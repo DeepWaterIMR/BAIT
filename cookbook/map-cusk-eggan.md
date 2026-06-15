@@ -3,8 +3,8 @@ title: Map cusk caught on the EggaN surveys
 questions:
   - "Make a map of cusk caught on the EggaN surveys."
   - "Where was brosme caught on the continental slope survey?"
-tables: [mission, stnall]
-packages: [tidyverse, duckdb, BioticExplorerServer, ggOceanMaps]
+tables: [mission, stnall, csindex]
+packages: [tidyverse, duckdb, ggOceanMaps]
 tags: [map, query]
 ---
 
@@ -15,7 +15,7 @@ northern continental-slope survey).
 
 ## Approach
 
-"EggaN" is a **cruise series**, identified via `BioticExplorerServer::cruiseSeries`
+"EggaN" is a **cruise series**, identified via the `csindex` table in the database
 (code ↔ name). The `cruiseseriescode` column is a comma-separated list, so match the code
 anywhere in it. Filter `stnall` to that series and to `commonname == "brosme"`, drop bad
 coordinates, then map with `ggOceanMaps`.
@@ -23,17 +23,16 @@ coordinates, then map with `ggOceanMaps`.
 ## Code
 
 ```r
-library(tidyverse); library(DBI); library(duckdb)
-library(BioticExplorerServer); library(ggOceanMaps)
+library(tidyverse); library(DBI); library(duckdb); library(ggOceanMaps)
 
 con <- dbConnect(duckdb::duckdb(),
                  dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
                  read_only = TRUE)
 stnall <- tbl(con, "stnall")
 
-# 1. EggaN cruise-series code(s): northern continental-slope survey
-csList <- BioticExplorerServer::cruiseSeries |>
-  select(cruiseseriescode, name) |> unique()
+# 1. EggaN cruise-series code(s): northern continental-slope survey (from the csindex table)
+csList <- tbl(con, "csindex") |>
+  distinct(cruiseseriescode, name) |> collect()
 selCS  <- csList[grepl("continental", csList$name, ignore.case = TRUE), ]
 # If north & south both match, narrow by name, e.g. grepl("nord|north", name, TRUE)
 csFilt <- selCS$cruiseseriescode

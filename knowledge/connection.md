@@ -34,8 +34,9 @@ meta     <- dplyr::tbl(con, "metadata") %>%             # when the database was 
   collect() %>% mutate_all(as.POSIXct)
 csindex  <- dplyr::tbl(con, "csindex")                  # cruise-series index (code -> name)
 gearlist <- dplyr::tbl(con, "gearindex") %>% collect()  # gear index (code -> name/category)
-# taxaindex: commonname/taxon lookup. Present in databases compiled after the taxa-table
-# update; guard for older databases and fall back to BioticExplorerServer::prepareTaxaList().
+# taxaindex: taxon/commonname lookup — the PRIMARY source for species names. Present in
+# databases compiled after the taxa table was added; guard for older databases (fall back to
+# the species list in species-and-surveys.md).
 if ("taxaindex" %in% DBI::dbListTables(con))
   taxa <- dplyr::tbl(con, "taxaindex") %>% collect()
 ```

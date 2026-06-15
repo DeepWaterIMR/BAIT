@@ -3,8 +3,8 @@ title: Maturity ogive (L50) for ling from the Coastal survey
 questions:
   - "Make a maturity ogive for ling using Coastal survey data."
   - "What is the L50 of lange on the Kysttokt?"
-tables: [mission, indall]
-packages: [tidyverse, duckdb, BioticExplorerServer, ggFishPlots]
+tables: [mission, indall, csindex]
+packages: [tidyverse, duckdb, ggFishPlots]
 tags: [lifehistory, query]
 ---
 
@@ -22,16 +22,15 @@ stages count as "mature" for ling before fitting. Report `$params` (L50), not ju
 ## Code
 
 ```r
-library(tidyverse); library(DBI); library(duckdb)
-library(BioticExplorerServer); library(ggFishPlots)
+library(tidyverse); library(DBI); library(duckdb); library(ggFishPlots)
 
 con <- dbConnect(duckdb::duckdb(),
                  dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
                  read_only = TRUE)
 indall <- tbl(con, "indall")
 
-# Coastal-survey cruise-series code(s)
-csList <- BioticExplorerServer::cruiseSeries |> select(cruiseseriescode, name) |> unique()
+# Coastal-survey cruise-series code(s) — from the csindex table in the database
+csList <- tbl(con, "csindex") |> distinct(cruiseseriescode, name) |> collect()
 selCS  <- csList[grepl("coastal|kyst", csList$name, ignore.case = TRUE), ]
 csFilt <- selCS$cruiseseriescode
 filtExp <- paste(sapply(csFilt, function(k) paste0(

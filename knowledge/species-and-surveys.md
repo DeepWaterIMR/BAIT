@@ -5,7 +5,27 @@ stores.
 
 ## Species — `commonname` is in Norwegian
 
-Filter `stnall`/`indall` on `commonname` using the **Norwegian** name. Common ones:
+Filter `stnall`/`indall` on `commonname` using the **Norwegian** name.
+
+**Primary source — the `taxaindex` table.** The database (built by BioticExplorerServer)
+carries a `taxaindex` table mapping taxa (`tsn`) → name + synonyms. Use it to translate an
+English/scientific name into the Norwegian `commonname` the data uses — everything from the
+database, no network calls:
+
+```r
+taxa <- dplyr::tbl(con, "taxaindex") |> dplyr::collect()
+# search every name/synonym column for a term:
+taxa |> dplyr::filter(dplyr::if_any(dplyr::everything(),
+                                    ~ grepl("brosme", ., ignore.case = TRUE)))
+```
+
+Then confirm the exact value used in the data:
+
+```r
+stnall |> dplyr::distinct(commonname) |> dplyr::filter(commonname %like% "brosme") |> dplyr::collect()
+```
+
+**Fallback** — only if `taxaindex` is absent (an older database): common species —
 
 | English | Scientific | `commonname` |
 |---|---|---|
@@ -22,34 +42,23 @@ Filter `stnall`/`indall` on `commonname` using the **Norwegian** name. Common on
 | Spurdog / spiny dogfish | *Squalus acanthias* | `pigghå` |
 | Greater silver smelt | *Argentina silus* | `vassild` |
 
-> Don't hard-code from memory beyond the obvious. **Verify** against the database:
-> ```r
-> stnall |> distinct(commonname) |> filter(commonname %like% "uer") |> collect()
-> ```
-> **Full name lookup:** the `taxaindex` table maps taxa (`tsn`) → name + synonyms — use it to
-> resolve `commonname` ↔ scientific name without a network call:
-> ```r
-> taxa <- dplyr::tbl(con, "taxaindex") |> collect()
-> taxa |> dplyr::filter(grepl("Brosme", name, ignore.case = TRUE))
-> ```
-> If the database predates the taxa table, fetch the live reference with
-> `BioticExplorerServer::prepareTaxaList()`. Species/genus also appear via `catchcategory`.
+> Don't hard-code species names from memory beyond the obvious — prefer the `taxaindex`
+> lookup above, and always confirm with `distinct(commonname)`. Species/genus also appear via
+> `catchcategory`.
 
 ## Surveys — use the cruise-series lookup, not guesswork
 
 A "survey" (e.g. EggaN, Coastal survey) is a **cruise series**. The database stores a
-comma-separated `cruiseseriescode` column on `mission`/`stnall`, and
-`BioticExplorerServer::cruiseSeries` (also the `csindex` table) maps **code → name**.
+comma-separated `cruiseseriescode` column on `mission`/`stnall`, and the **`csindex`** table
+(built into the database) maps **code → name**.
 
-**Pattern (verified against the maintainer's own scripts):**
+**Pattern (read the lookup from the database, not from a package):**
 
 ```r
-library(BioticExplorerServer)
-
-# 1. Find the cruise-series code(s) by name
-csList <- BioticExplorerServer::cruiseSeries |>
-  dplyr::select(cruiseseriescode, name) |>
-  unique()
+# 1. Find the cruise-series code(s) by name — from the database's csindex table
+csList <- dplyr::tbl(con, "csindex") |>
+  dplyr::distinct(cruiseseriescode, name) |>
+  dplyr::collect()
 
 selCS  <- csList[grepl("continental", csList$name, ignore.case = TRUE), ]  # EggaN/EggaS
 csFilt <- selCS$cruiseseriescode
@@ -90,7 +99,7 @@ Common survey series (confirm the exact `name` string with the lookup above):
 
 - **`icesarea`** (on `stnall` in the DuckDB build) — e.g. ICES subareas/divisions like
   `"27.1"`, `"27.2.a"`. Filter with `%like%` / `grepl()` on the prefix.
-- **`gear`** — numeric code; the `gearindex` table (and
-  `BioticExplorerServer::prepareGearList()`) resolve code → gear name/category.
+- **`gear`** — numeric code; the `gearindex` table (built into the database) resolves
+  code → gear name/category.
 - Other coded fields (maturity stage, sex, readability…) are NMDreference foreign keys;
   see [`field-glossary.md`](field-glossary.md) for which fields are codes.

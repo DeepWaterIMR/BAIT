@@ -6,7 +6,7 @@ Use these packages; don't reinvent what they already do.
 
 | Package | Role | Key functions |
 |---|---|---|
-| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | Build/maintain the DuckDB database; cruise-series / gear / taxa lookups | `compileDatabase()`, `prepareCruiseSeriesList()`, `prepareGearList()`, `prepareTaxaList()`, data `cruiseSeries` |
+| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | **Builds/maintains** the DuckDB database (run once via the server-setup skill). Bakes the `csindex`/`gearindex`/`taxaindex` lookup tables into the DB | `compileDatabase()` |
 | [RstoxUtils](https://deepwaterimr.github.io/RstoxUtils/) | Parse NMD Biotic XML; the `stnall`/`indall` flattening logic | `processBioticFile()`, `processBioticFiles()`, `coreDataList()` |
 | [RstoxData](https://github.com/StoXProject/RstoxData) | Low-level NMD Biotic XML reader (used under the hood) | `readXmlFile()` |
 | DBI + duckdb | Database connection | `dbConnect()`, `dplyr::tbl()` |
@@ -31,6 +31,10 @@ Use these packages; don't reinvent what they already do.
 
 ## Conventions
 
+- **Read reference data from the database, not from BES functions.** Cruise series, gear, and
+  taxa/species names come from the `csindex`/`gearindex`/`taxaindex` tables in the DuckDB.
+  `BioticExplorerServer` is used **only** to build/update the database (the server-setup
+  skill) — don't call `prepareTaxaList()`/`prepareGearList()`/`cruiseSeries` etc. at query time.
 - **Maps**: prefer `ggOceanMaps::qmap()` for a quick look; `basemap()` for publication
   figures with bathymetry. Use `leaflet` when the user wants pan/zoom interactivity.
 - **Life-history**: `ggFishPlots` functions take `indall`-shaped data and return both the

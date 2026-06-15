@@ -61,23 +61,24 @@ geographic lookups such as `icesarea` — confirm with `colnames(stnall)`.
 - **Empty-catch stations** can have `commonname = NA` (stations retained without catch).
 - **Codes** (gear, area, maturity stage…) are foreign keys into **NMDreference**; the
   glossary flags these. Resolve them with the in-database lookup tables (`gearindex`,
-  `csindex`, `taxaindex`; see below) or the `BioticExplorerServer::prepare*List()` helpers.
+  `csindex`, `taxaindex`; see below) — read these from the database, don't call BES functions.
 
 ## Lookup / reference tables in the database
 
 Besides the core tables, the DuckDB carries small reference tables you can `collect()` up
 front (inspect what's present with `DBI::dbListTables(con)`):
 
-| Table | Maps | Source |
-|---|---|---|
-| `csindex` | cruise-series code → name | `BioticExplorerServer::prepareCruiseSeriesList()` / data `cruiseSeries` |
-| `gearindex` | gear code → name / category | `BioticExplorerServer::prepareGearList()` |
-| `taxaindex` | taxon (`tsn`) → name + synonyms; resolves `commonname` | `BioticExplorerServer::prepareTaxaList()` |
-| `metadata` | when the database was built | — |
+| Table | Maps |
+|---|---|
+| `csindex` | cruise-series code → name |
+| `gearindex` | gear code → name / category |
+| `taxaindex` | taxon (`tsn`) → name + synonyms; **primary source for species names** |
+| `metadata` | when the database was built |
 
-`taxaindex` is present in databases compiled after the taxa table was added to
-`compileDatabase()`. For older databases, call `BioticExplorerServer::prepareTaxaList()`
-directly (it fetches the live taxa reference). See
+All four are written into the DuckDB by **BioticExplorerServer** when the database is
+compiled — **query them from the database; don't call BES fetch functions** from BAIT.
+`taxaindex` is present in databases compiled after the taxa table was added; if it's absent
+in an older database, fall back to the species list in
 [`species-and-surveys.md`](species-and-surveys.md).
 
 The full, generated field dictionary is [`field-glossary.md`](field-glossary.md).
