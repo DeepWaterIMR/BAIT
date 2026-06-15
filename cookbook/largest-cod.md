@@ -35,7 +35,9 @@ con <- dbConnect(duckdb::duckdb(),
                  read_only = TRUE)
 indall <- tbl(con, "indall")
 
-# Top heaviest candidates, descending — only 10 rows collected
+# --- HEAVIEST ---
+
+# Step 1: top 10 candidates reduced in DuckDB
 heaviest_cand <- indall |>
   filter(commonname == "torsk", !is.na(individualweight)) |>
   slice_max(individualweight, n = 10) |>
@@ -43,34 +45,72 @@ heaviest_cand <- indall |>
   collect() |>
   mutate(
     length_cm = length * 100,
-    K = 100 * (individualweight * 1000) / (length_cm)^3,   # Fulton's K (~0.8–1.5 for cod)
-    flag = is.na(K) | K < 0.4 | K > 3 | individualweight > 60
+    K = ifelse(!is.na(length) & length > 0,
+               100 * (individualweight * 1000) / (length_cm)^3, NA_real_)
   )
 
-# Top longest candidates — flag against a plausible max length (~150 cm for cod)
+# Step 2: station-clustering check — one haul with grams-for-kg entries will fill all top slots
+station_counts <- count(heaviest_cand, serialnumber, sort = TRUE)
+bad_stations   <- station_counts |> filter(n >= 3) |> pull(serialnumber)
+
+# Step 3: if bad station(s) detected, re-query excluding them
+if (length(bad_stations) > 0) {
+  message("Excluding station(s) with systematic entry errors: ", paste(bad_stations, collapse = ", "))
+  heaviest_cand <- indall |>
+    filter(commonname == "torsk", !is.na(individualweight),
+           !serialnumber %in% bad_stations) |>
+    slice_max(individualweight, n = 10) |>
+    select(startyear, serialnumber, length, individualweight, age, sex) |>
+    collect() |>
+    mutate(
+      length_cm = length * 100,
+      K = ifelse(!is.na(length) & length > 0,
+                 100 * (individualweight * 1000) / (length_cm)^3, NA_real_)
+    )
+}
+
+# Step 4: flag remaining individual records with implausible Fulton's K
+heaviest_cand <- heaviest_cand |>
+  mutate(flag = !is.na(K) & (K < 0.4 | K > 3))
+
+heaviest_cand                                              # inspect flagged rows
+heaviest <- heaviest_cand |> filter(!flag) |> slice_max(individualweight, n = 1)
+
+# --- LONGEST ---
+
+# Length outliers without weight cannot be cross-checked with K — do not auto-flag them
 longest_cand <- indall |>
   filter(commonname == "torsk", !is.na(length)) |>
   slice_max(length, n = 10) |>
   select(startyear, serialnumber, length, individualweight, age, sex) |>
   collect() |>
-  mutate(length_cm = length * 100, flag = length_cm > 150)
+  mutate(
+    length_cm = length * 100,
+    K = ifelse(!is.na(individualweight) & length > 0,
+               100 * (individualweight * 1000) / (length_cm)^3, NA_real_),
+    flag = !is.na(K) & (K < 0.4 | K > 3),   # only flag when K can be computed
+    note = ifelse(is.na(K), "no weight — unverifiable", ifelse(flag, "implausible K", "OK"))
+  )
 
-heaviest_cand                                              # inspect flagged rows
-heaviest <- heaviest_cand |> filter(!flag) |> slice_max(individualweight, n = 1)
-longest  <- longest_cand  |> filter(!flag) |> slice_max(length, n = 1)
+longest_cand                                               # inspect; NA weight = can't cross-check
+longest <- longest_cand |> filter(!flag) |> slice_max(length, n = 1)
 
 dbDisconnect(con, shutdown = TRUE)
 ```
 
 ## Expected output
 
-Two candidate tables of 10 rows each, with a `flag` column marking suspected typos, plus the
-filtered one-row answers. As of the 2026 build:
+Two candidate tables of 10 rows each, with a `flag` / `note` column, plus the filtered one-row
+answers. As of the 2026 build:
 
-- **Heaviest (plausible):** ~41 kg, ~146–151 cm, age 15–18. The raw max is **18 100 kg at
-  114 cm** — a typo (K ≈ 1200), and a **100 kg at 20 cm** record is another (probably 100 g).
-- **Longest (plausible):** ~150 cm. The raw max is **179 cm** with no weight — implausible for
-  cod (record ~130 cm), so flagged.
+- **Heaviest (plausible):** ~41 kg, ~146–151 cm, age 15–18.
+  The first query returns all 10 slots from a single station (`serialnumber = 50256`, 2026) with
+  weights in grams-for-kg (raw "max" = 18 100 kg at 114 cm). The station-clustering check
+  detects this and re-queries excluding that station. The second pass still has two individual
+  typos: 133 kg at 107 cm (K ≈ 11, likely 13.3 kg) and 100 kg at 20 cm age 2 (K ≈ 1250,
+  probably 100 g). After flagging those by K, the **plausible heaviest is ~41 kg**.
+- **Longest:** top entries are 170–179 cm (all without weight). These cannot be cross-checked
+  with K and are reported as "unverifiable" — not auto-flagged as typos.
 
 Report the plausible answers **and** disclose the flagged records as suspected data-entry errors
 so the user can verify the raw data.
@@ -79,10 +119,16 @@ so the user can verify the raw data.
 
 - **Report both** longest and heaviest — they're usually different fish, and the longest may
   lack a weight.
-- **Never report the raw `max()`** — the extreme tail is where typos live. Top N → sanity-check
-  → largest plausible. See [`../knowledge/data-quality.md`](../knowledge/data-quality.md).
+- **Never report the raw `max()`** — the extreme tail is where typos live. Top N →
+  station-clustering check → K sanity-check → largest plausible. See
+  [`../knowledge/data-quality.md`](../knowledge/data-quality.md).
+- **Station clustering is the first check.** A whole haul recorded in grams instead of kg will
+  fill all top slots — Fulton's K alone won't catch it because K is computed per fish. Look for
+  `serialnumber` appearing ≥3 times in the top 10 and exclude the station before going further.
 - **Fulton's K** `= 100·W(g)/L(cm)³` is a species-agnostic cross-check: real fish ≈ 0.8–1.5;
-  typos blow it into the hundreds. Use it whenever both length and weight are present.
+  typos blow it into the tens or hundreds. Use it whenever both length and weight are present.
+- **Length-only records** cannot be cross-checked with K. Report them as "unverifiable" rather
+  than auto-flagging as typos — large individuals exist.
 - **Memory:** `slice_max(x, n = 10)` reduces in DuckDB so only 10 rows are collected. Never
   `indall |> filter(commonname=="torsk") |> collect()` then `slice_max()`.
 - Add `filter(missiontype %in% c(4, 5))` to restrict to research surveys.
