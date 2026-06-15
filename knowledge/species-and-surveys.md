@@ -50,13 +50,14 @@ stnall |> dplyr::distinct(commonname) |> dplyr::filter(commonname %like% "brosme
 
 A "survey" (e.g. EggaN, Coastal survey) is a **cruise series**. The database stores a
 comma-separated `cruiseseriescode` column on `mission`/`stnall`, and the **`csindex`** table
-(built into the database) maps **code → name**.
+maps **code → name**. `csindex` is loaded for you by `biotic-connect` — use it directly
+(don't re-load it or call a package).
 
-**Pattern (read the lookup from the database, not from a package):**
+**Pattern:**
 
 ```r
-# 1. Find the cruise-series code(s) by name — from the database's csindex table
-csList <- dplyr::tbl(con, "csindex") |>
+# 1. Find the cruise-series code(s) by name — csindex is loaded by biotic-connect
+csList <- csindex |>
   dplyr::distinct(cruiseseriescode, name) |>
   dplyr::collect()
 
@@ -75,9 +76,14 @@ filtExp <- paste(sapply(csFilt, function(k) {
 stn <- stnall |> dplyr::filter(!!!rlang::parse_exprs(filtExp)) |> collect()
 ```
 
-Common survey series (confirm the exact `name` string with the lookup above):
+### Cruise-series nicknames (living list — users expand it)
 
-| Survey | Norwegian / series name contains | Notes |
+Surveys go by **nicknames** (EggaN, Kysttokt, …). Map a nickname to a search term for
+`csindex$name`, then use the pattern above. This list grows as the team confirms the exact
+`name` strings and codes — **add a row whenever you learn or are taught a new one**, and
+verify the search term against `csindex` before relying on it.
+
+| Survey (nickname) | `csindex$name` contains | Notes |
 |---|---|---|
 | EggaN | "continental" slope, **north** | Slope survey, Norwegian Sea / N |
 | EggaS | "continental" slope, **south** | Slope survey, southern part |

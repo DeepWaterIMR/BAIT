@@ -28,10 +28,11 @@ library(tidyverse); library(DBI); library(duckdb); library(ggOceanMaps)
 con <- dbConnect(duckdb::duckdb(),
                  dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
                  read_only = TRUE)
-stnall <- tbl(con, "stnall")
+stnall  <- tbl(con, "stnall")
+csindex <- tbl(con, "csindex")   # cruise-series lookup (loaded as standard in biotic-connect)
 
-# 1. EggaN cruise-series code(s): northern continental-slope survey (from the csindex table)
-csList <- tbl(con, "csindex") |>
+# 1. EggaN cruise-series code(s): northern continental-slope survey
+csList <- csindex |>
   distinct(cruiseseriescode, name) |> collect()
 selCS  <- csList[grepl("continental", csList$name, ignore.case = TRUE), ]
 # If north & south both match, narrow by name, e.g. grepl("nord|north", name, TRUE)

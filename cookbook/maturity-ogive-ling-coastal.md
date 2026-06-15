@@ -27,10 +27,11 @@ library(tidyverse); library(DBI); library(duckdb); library(ggFishPlots)
 con <- dbConnect(duckdb::duckdb(),
                  dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
                  read_only = TRUE)
-indall <- tbl(con, "indall")
+indall  <- tbl(con, "indall")
+csindex <- tbl(con, "csindex")   # cruise-series lookup (loaded as standard in biotic-connect)
 
-# Coastal-survey cruise-series code(s) — from the csindex table in the database
-csList <- tbl(con, "csindex") |> distinct(cruiseseriescode, name) |> collect()
+# Coastal-survey cruise-series code(s)
+csList <- csindex |> distinct(cruiseseriescode, name) |> collect()
 selCS  <- csList[grepl("coastal|kyst", csList$name, ignore.case = TRUE), ]
 csFilt <- selCS$cruiseseriescode
 filtExp <- paste(sapply(csFilt, function(k) paste0(
