@@ -37,9 +37,3 @@ Your data never leaves your computer and never enters any model's weights. The a
 - New here? → [Getting started](getting-started.qmd)
 - Want ideas? → [Example queries](examples.qmd)
 - Worried about data? → [Privacy](privacy.qmd) *(read this first)*
-
-::: {.callout-tip}
-## Hosting a KI-kaffe?
-This whole thing pairs with the session **"Biotic goes agentic."** Clone the repo, open
-your agent in the folder, and demo the example queries live.
-:::
