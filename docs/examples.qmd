@@ -20,7 +20,8 @@ recipe** (the standardized answer the agent uses and adapts).
 - **"Map all spurdog in ICES areas 1 and 2."**
   → [`pigghaa-ices-1-2`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/pigghaa-ices-1-2.md)
 - "Interactive leaflet map of cod catches, coloured by year."
-- "Catch-composition pie charts per station for the coastal survey."
+- **"Catch-composition pie charts per station for the coastal survey."**
+  → [`catch-composition-coastal`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/catch-composition-coastal.md)
 
 ## Life-history
 

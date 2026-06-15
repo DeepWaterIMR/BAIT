@@ -3,7 +3,7 @@ title: "🎣 BAIT — Biotic AI Toolkit"
 subtitle: "Biotic goes agentic"
 ---
 
-**BAIT teaches your AI coding agent (Claude Code, Codex, Cursor, …) to work with the IMR
+**BAIT teaches your AI coding agent (Claude Code, Codex, Cursor, Mistral Vibe, …) to work with the IMR
 Biotic database — and keeps your raw data on your own machine.**
 
 Ask in plain language:
