@@ -39,23 +39,32 @@ Never skip this step, even if BAIT is already partly installed.
 
 1. **Look for an existing install** before cloning:
    - Read `~/.bait/config.json` if it exists → use its `bait_path`.
+   - If `bait_path` exists and contains `AGENTS.md`, `CLAUDE.md`, and `skills/bait-install/SKILL.md`,
+     treat BAIT as already installed. Do **not** clone another copy.
+   - If you already cloned BAIT during this install attempt before finding the existing
+     `bait_path`, remove that accidental duplicate (or ask for confirmation if your tool
+     requires approval for destructive actions) after verifying it has no uncommitted user
+     changes. Keep the configured `bait_path` as the one source of truth.
    - Otherwise search likely locations (home, Documents, projects/code folders, any path the
      user has mentioned). If found, reuse it.
-2. **If not found, ask where to clone it.** Suggest a sensible default based on what you know
+2. **If an existing install is found, reuse it.**
+   - Check `git status --short --branch` in the existing install and report whether it is clean.
+   - Continue with skill syncing, database lookup, and connection verification using that path.
+3. **If not found, ask where to clone it.** Suggest a sensible default based on what you know
    about the user (e.g. their usual code/projects folder); otherwise propose `~/Documents/BAIT`
    or `~/BAIT`.
-3. **🔒 Security — never install at a filesystem root or system directory.**
+4. **🔒 Security — never install at a filesystem root or system directory.**
    - Reject paths like `/`, `C:\` (drive root), `/usr`, `/opt`, `C:\Windows`, `C:\Program Files`.
      (Some users — especially on Windows — drop repos straight into `C:\`. Don't allow it.)
    - If the user *insists* on root, **deny the request** and propose a safe user-space
      location instead (under their home directory). Explain it's a security/permissions risk.
    - If you discover an existing BAIT **or** BES database already sitting in a root/system
      dir, warn the user it shouldn't live there and offer to move it.
-4. **Clone:**
+5. **Clone only when no existing install was found:**
    ```bash
    git clone https://github.com/DeepWaterIMR/BAIT "<chosen-path>"
    ```
-5. **Record the install** so every future session/project can find it:
+6. **Record the install** so every future session/project can find it:
    - Write/merge `~/.bait/config.json`:
      ```json
      { "bait_path": "<chosen-path>",
@@ -65,7 +74,7 @@ Never skip this step, even if BAIT is already partly installed.
      ```
    - **Save to your own long-term memory** that BAIT lives at `<chosen-path>` and what it's
      for, so you recall it across projects. (For Claude Code, note it in user-level memory.)
-6. **Make BAIT work across projects — install the skills globally.** Copy the skill folders
+7. **Make BAIT work across projects — install the skills globally.** Copy the skill folders
    into the user-level skills directory so they auto-load in every project:
    - macOS/Linux:
      ```bash

@@ -55,7 +55,10 @@ instructions at the saved `bait_path` and read the skills from there.
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or
   requests like maps/queries/maturity ogives on it), reach for the `biotic-*` skills.
 - **If BAIT isn't installed yet** (e.g. the user says *"install https://github.com/DeepWaterIMR/BAIT"*),
-  run `skills/bait-install/SKILL.md` first.
+  run `skills/bait-install/SKILL.md` first. For Codex and other agents that may start by
+  cloning the URL, immediately check `~/.bait/config.json`; if it points to a valid existing
+  install, reuse that path and clean up any accidental duplicate clone from the current
+  workspace after verifying it has no user changes.
 - **🔒 Never install BAIT or the database at a filesystem root / system directory** (`/`,
   `C:\`, …). If asked, refuse and suggest a safe user-space location.
 
