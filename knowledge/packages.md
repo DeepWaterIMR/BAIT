@@ -6,8 +6,8 @@ Use these packages; don't reinvent what they already do.
 
 | Package | Role | Key functions |
 |---|---|---|
-| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | Build/maintain the DuckDB database; cruise-series lookup | `compileDatabase()`, data `cruiseSeries` |
-| [RstoxUtils](https://deepwaterimr.github.io/RstoxUtils/) | Parse NMD Biotic XML; the `stnall`/`indall` flattening logic; code lookups | `processBioticFile()`, `processBioticFiles()`, `coreDataList()`, `prepareCruiseSeriesList()`, `prepareGearList()`, `prepareTaxaList()` |
+| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | Build/maintain the DuckDB database; cruise-series / gear / taxa lookups | `compileDatabase()`, `prepareCruiseSeriesList()`, `prepareGearList()`, `prepareTaxaList()`, data `cruiseSeries` |
+| [RstoxUtils](https://deepwaterimr.github.io/RstoxUtils/) | Parse NMD Biotic XML; the `stnall`/`indall` flattening logic | `processBioticFile()`, `processBioticFiles()`, `coreDataList()` |
 | [RstoxData](https://github.com/StoXProject/RstoxData) | Low-level NMD Biotic XML reader (used under the hood) | `readXmlFile()` |
 | DBI + duckdb | Database connection | `dbConnect()`, `dplyr::tbl()` |
 | tidyverse (dplyr, tidyr, …) | Querying & wrangling | lazy `filter`/`select`/`summarise` → `collect()` |

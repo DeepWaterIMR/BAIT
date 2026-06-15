@@ -26,8 +26,14 @@ Filter `stnall`/`indall` on `commonname` using the **Norwegian** name. Common on
 > ```r
 > stnall |> distinct(commonname) |> filter(commonname %like% "uer") |> collect()
 > ```
-> `commonname` resolves to NMD/`aphia` taxon codes; species/genus also appear via
-> `catchcategory`. Some helpers: `RstoxUtils::prepareTaxaList()`.
+> **Full name lookup:** the `taxaindex` table maps taxa (`tsn`) → name + synonyms — use it to
+> resolve `commonname` ↔ scientific name without a network call:
+> ```r
+> taxa <- dplyr::tbl(con, "taxaindex") |> collect()
+> taxa |> dplyr::filter(grepl("Brosme", name, ignore.case = TRUE))
+> ```
+> If the database predates the taxa table, fetch the live reference with
+> `BioticExplorerServer::prepareTaxaList()`. Species/genus also appear via `catchcategory`.
 
 ## Surveys — use the cruise-series lookup, not guesswork
 
@@ -84,7 +90,7 @@ Common survey series (confirm the exact `name` string with the lookup above):
 
 - **`icesarea`** (on `stnall` in the DuckDB build) — e.g. ICES subareas/divisions like
   `"27.1"`, `"27.2.a"`. Filter with `%like%` / `grepl()` on the prefix.
-- **`gear`** — numeric code; the `gearindex` table (and `RstoxUtils::prepareGearList()`)
-  resolve code → gear name/category.
+- **`gear`** — numeric code; the `gearindex` table (and
+  `BioticExplorerServer::prepareGearList()`) resolve code → gear name/category.
 - Other coded fields (maturity stage, sex, readability…) are NMDreference foreign keys;
   see [`field-glossary.md`](field-glossary.md) for which fields are codes.

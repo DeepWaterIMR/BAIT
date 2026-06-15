@@ -23,12 +23,31 @@ db_path <- path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
 # Read-only: we never modify the database from BAIT.
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 
-# Lazy table references — no data is pulled yet.
-mission <- dplyr::tbl(con, "mission")
-stnall  <- dplyr::tbl(con, "stnall")   # mission + fishstation + catchsample
-indall  <- dplyr::tbl(con, "indall")   # stnall + individual + (preferred) agedetermination
-# ageall <- dplyr::tbl(con, "ageall")  # one row per age reading (if present)
+# Core tables — lazy, no data pulled yet:
+mission <- dplyr::tbl(con, "mission") # survey / cruise information
+stnall  <- dplyr::tbl(con, "stnall")  # station + catch data (mission + fishstation + catchsample)
+indall  <- dplyr::tbl(con, "indall")  # individual fish (stnall + individual + preferred age)
+ageall  <- dplyr::tbl(con, "ageall")  # all age readings (one row per reading)
+
+# Reference / lookup tables — small, safe to collect() up front:
+meta     <- dplyr::tbl(con, "metadata") %>%             # when the database was downloaded
+  collect() %>% mutate_all(as.POSIXct)
+csindex  <- dplyr::tbl(con, "csindex")                  # cruise-series index (code -> name)
+gearlist <- dplyr::tbl(con, "gearindex") %>% collect()  # gear index (code -> name/category)
+# taxaindex: commonname/taxon lookup. Present in databases compiled after the taxa-table
+# update; guard for older databases and fall back to BioticExplorerServer::prepareTaxaList().
+if ("taxaindex" %in% DBI::dbListTables(con))
+  taxa <- dplyr::tbl(con, "taxaindex") %>% collect()
 ```
+
+## Tables available
+
+- **Core** (query lazily, `collect()` the result): `mission`, `stnall`, `indall`, `ageall` —
+  see [`data-model.md`](data-model.md).
+- **Reference / lookup** (small; `collect()` up front): `metadata` (build time), `csindex`
+  (cruise-series code → name), `gearindex` (gear code → name/category), and `taxaindex`
+  (taxon / `commonname` lookup — see [`species-and-surveys.md`](species-and-surveys.md)).
+  Inspect what a given database holds with `DBI::dbListTables(con)`.
 
 ## Golden rules
 
