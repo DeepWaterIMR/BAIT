@@ -25,14 +25,41 @@ location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). Use the cho
 3. **⏱️ Set expectations.** Tell the user the download can take **up to several hours**
    depending on connection. **Do not** run it over **mobile internet or Starlink** (e.g. on
    research vessels) — use a stable cable/Wi-Fi intranet connection.
+4. **📦 Package up-to-date check.** Always confirm BioticExplorerServer matches the latest on
+   GitHub before a download or update — do **Step 1** first.
 
-## 1. Install the package
+## 1. Install / update the package — REQUIRED before any download or update
+
+Before a **first download (Step 2)** or an **update (Step 3)**, ensure the locally installed
+**BioticExplorerServer matches the latest on GitHub**. The download/compile logic — and the DB
+schema (e.g. the `taxaindex` table) — change over time, so running an old version against the
+live data can produce a broken or out-of-date database.
 
 ```r
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+# remotes compares the installed git SHA against GitHub and reinstalls ONLY if there is a
+# newer commit — so this single call *is* the up-to-date check:
 remotes::install_github("DeepWaterIMR/BioticExplorerServer")
 ```
 
+To explicitly report whether an update was available (e.g. to tell the user):
+```r
+local_ver  <- as.character(utils::packageVersion("BioticExplorerServer"))
+remote_ver <- read.dcf(url(
+  "https://raw.githubusercontent.com/DeepWaterIMR/BioticExplorerServer/master/DESCRIPTION"
+))[, "Version"]
+utils::compareVersion(remote_ver, local_ver)   # 1 = GitHub newer, 0 = same, -1 = local ahead
+```
+
+- Needs **general internet / GitHub** access (separate from the IMR intranet used for the data).
+- **Compile in a fresh R session after an update.** Steps 2–3 launch the download in a new
+  background `Rscript`, so they automatically pick up the just-installed version — don't call
+  `compileDatabase()` in a session that already loaded the old package.
+- Keep `duckdb` current too (see Maintenance).
+
 ## 2. First-time download — as a monitored background job with a log
+
+> ⚠️ Do **Step 1** (package up-to-date check) first.
 
 Run the download **detached** so it survives the terminal/agent session, and **log** it next
 to the database as `bes_download_log.log`.
@@ -66,9 +93,10 @@ file.exists(path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"))
 
 ## 3. Update the database (fresh data)
 
-No change-timestamps upstream ⇒ update = full re-download. Repeat the **pre-flight** (intranet!).
-**Safe pattern** — build alongside, then swap, so a failed download never destroys the working
-database. Run this in the background with logging exactly as in Step 2:
+No change-timestamps upstream ⇒ update = full re-download. Repeat the **pre-flight** first —
+especially **Step 1 (ensure BioticExplorerServer is up to date on GitHub)** and the intranet
+check. **Safe pattern** — build alongside, then swap, so a failed download never destroys the
+working database. Run this in the background with logging exactly as in Step 2:
 
 ```r
 library(BioticExplorerServer)

@@ -44,8 +44,9 @@ toolkit.
 The IMR source has no change timestamps, so a database update = a **full re-download**.
 Requires the **IMR intranet** (VPN / HI-Adm). Hand off to
 [`../biotic-server-setup/SKILL.md`](../biotic-server-setup/SKILL.md) → "Update the database":
-it builds alongside the current database, monitors the background job with a log, and swaps
-the new file in on success (so a failed download never destroys the working database).
+it **first checks that BioticExplorerServer itself is up to date on GitHub** (Step 1), then
+builds alongside the current database, monitors the background job with a log, and swaps the
+new file in on success (so a failed download never destroys the working database).
 
 ## Notes
 
