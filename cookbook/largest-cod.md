@@ -10,14 +10,17 @@ tags: [query]
 
 # Largest cod in the database
 
-**Answers:** the single longest measured Atlantic cod (`commonname == "torsk"`), with its
-length in cm and its weight.
+**Answers:** the largest Atlantic cod (`commonname == "torsk"`) — reported **both ways**:
+the **longest** (`length`) and the **heaviest** (`individualweight`), since "largest" is
+ambiguous.
 
 ## Approach
 
-Use `indall` (one row per measured fish). Filter to `torsk`, drop missing lengths, take the
-maximum length. `length` is stored in **metres**, so multiply by 100 for cm. Optionally also
-report the heaviest by `individualweight`.
+Use `indall` (one row per measured fish). **Do the max in DuckDB** — filter to `torsk`, then
+keep the row(s) where `length` (or `individualweight`) equals the column max, and `collect()`
+only those. **Don't** collect all cod and take the max in R: that pulls millions of rows and
+can freeze the machine (see [`../knowledge/performance.md`](../knowledge/performance.md)).
+`length` is in **metres** → ×100 for cm.
 
 ## Code
 
@@ -29,33 +32,46 @@ con <- dbConnect(duckdb::duckdb(),
                  read_only = TRUE)
 indall <- tbl(con, "indall")
 
-biggest <- indall |>
+# Longest cod — max computed in DuckDB; only the matching row(s) come back
+longest <- indall |>
   filter(commonname == "torsk", !is.na(length)) |>
-  slice_max(length, n = 1, with_ties = FALSE) |>
+  filter(length == max(length, na.rm = TRUE)) |>
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
   collect() |>
   mutate(length_cm = length * 100)
 
-biggest |> select(startyear, cruise, serialnumber, length_cm, individualweight, age, sex)
+# Heaviest cod
+heaviest <- indall |>
+  filter(commonname == "torsk", !is.na(individualweight)) |>
+  filter(individualweight == max(individualweight, na.rm = TRUE)) |>
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
+  collect()
+
+longest
+heaviest
 
 dbDisconnect(con, shutdown = TRUE)
 ```
 
 ## Expected output
 
-A one-row tibble: year, cruise, station (`serialnumber`), `length_cm` (a large cod is
-~130–150 cm, i.e. `length` ≈ 1.3–1.5 m), `individualweight` in kg, plus `age`/`sex` if
-recorded. (Numbers here are illustrative, not real records.)
+Two one-row (or few-row, on ties) tibbles. The **longest** cod is ~1.7–1.8 m
+(`length_cm` ≈ 170–180); the longest specimen may have **no** `individualweight` recorded, so
+report the **heaviest** separately. Each row carries year, station (`serialnumber`), length,
+weight, and `age`/`sex` if recorded. (Illustrative magnitudes, not real records.)
 
 ## Notes & caveats
 
-- "Largest" is ambiguous — confirm whether the user means **longest** (`length`) or
-  **heaviest** (`individualweight`). Swap `slice_max(length, …)` for
-  `slice_max(individualweight, …)` for the latter.
-- Watch for data-entry outliers (an impossible 3 m cod). Sanity-check the top few:
-  `slice_max(length, n = 5)`.
-- Restrict to surveys with `missiontype %in% c(4, 5)` if commercial records should be excluded.
+- **Report both** longest and heaviest — they're usually different fish, and the longest may
+  lack a weight.
+- **Memory:** the `filter(x == max(x))` form reduces in DuckDB so only the top row(s) are
+  collected. Never `indall |> filter(commonname=="torsk") |> collect()` then `slice_max()`.
+- Watch for data-entry outliers (an impossible 3 m cod). Sanity-check the top few in DuckDB:
+  `... |> arrange(desc(length)) |> head(5) |> collect()`.
+- Add `filter(missiontype %in% c(4, 5))` to restrict to research surveys.
 
 ## Related
 
 - Skill: `../skills/biotic-query/SKILL.md`
+- Performance: `../knowledge/performance.md`
 - Glossary: `../knowledge/field-glossary.md`

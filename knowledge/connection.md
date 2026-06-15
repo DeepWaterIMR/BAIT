@@ -54,7 +54,8 @@ if ("taxaindex" %in% DBI::dbListTables(con))
 
 1. **Always `read_only = TRUE`.** BAIT reads; it never writes the database.
 2. **Build the query lazily, then `collect()` once at the end.** DuckDB does the filtering;
-   only the final (small) result is pulled into R memory. Never `collect()` a whole table.
+   only the final (small) result is pulled into R memory. **Never `collect()` a whole table**
+   — see [`performance.md`](performance.md) for memory-safe querying (and when to warn the user).
 3. **Disconnect when done:**
    ```r
    DBI::dbDisconnect(con, shutdown = TRUE)

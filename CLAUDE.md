@@ -87,6 +87,10 @@ shared source of truth.
 3. Use [`knowledge/field-glossary.md`](knowledge/field-glossary.md) to translate
    plain-English terms into real column names. Don't guess column names.
 4. Check [`cookbook/`](cookbook/) — a recipe may already exist; adapt it.
+5. **Query within memory limits** — aggregate/filter in DuckDB and `collect()` only the small
+   final result; **never `collect()` a whole table**. For large/unknown results, count and
+   estimate first, and warn/ask before pulling a lot into RAM. See
+   [`knowledge/performance.md`](knowledge/performance.md).
 
 ## Learning loop
 

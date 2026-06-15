@@ -14,20 +14,34 @@ description: Turn a natural-language question about IMR Biotic data into a tidyv
    Don't guess column names; confirm with `colnames(stnall)`.
 4. **Resolve species/surveys** — [`../../knowledge/species-and-surveys.md`](../../knowledge/species-and-surveys.md).
    `commonname` is **Norwegian**; surveys are **cruise series**.
-5. **Build lazily, `collect()` once at the end.** Let DuckDB do the work.
+5. **Build lazily; aggregate/filter in DuckDB; `collect()` only the small final result.**
+   This is a hard rule — see [`../../knowledge/performance.md`](../../knowledge/performance.md).
+   **Never `collect()` a whole table** (millions of rows can freeze the machine), and for any
+   query of unknown size, **count first, estimate memory, and ask before a large collect.**
 6. **Report units correctly:** `length` is metres (×100 for cm), weights are kg.
-7. If the question is new, **offer to save a cookbook recipe** (see `../../CONTRIBUTING.md`).
+7. **Answer the whole question.** "Largest" is ambiguous → give **both** longest and heaviest.
+8. If the question is new, **offer to save a cookbook recipe** (see `../../CONTRIBUTING.md`).
 
 ## Patterns
 
-**Largest / extreme value**
+**Largest / extreme value — reduce in DuckDB, and report both length and weight**
 ```r
-indall |>
+# longest
+longest <- indall |>
   filter(commonname == "torsk", !is.na(length)) |>
-  slice_max(length, n = 1) |>
-  collect() |>
-  mutate(length_cm = length * 100)        # length is in metres
+  filter(length == max(length, na.rm = TRUE)) |>          # max computed in DuckDB
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
+  collect() |> mutate(length_cm = length * 100)           # length is in metres
+
+# heaviest
+heaviest <- indall |>
+  filter(commonname == "torsk", !is.na(individualweight)) |>
+  filter(individualweight == max(individualweight, na.rm = TRUE)) |>
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
+  collect()
 ```
+Don't `collect()` all cod and take the max in R — that pulls millions of rows. See the recipe
+[`../../cookbook/largest-cod.md`](../../cookbook/largest-cod.md).
 
 **Filter to research surveys**
 ```r
@@ -55,7 +69,10 @@ the worked recipe [`../../cookbook/map-cusk-eggan.md`](../../cookbook/map-cusk-e
 - A column may not exist in every build — check `colnames()` first.
 - Coordinates: drop `NA` and bad values (`latitudestart > 0`) before mapping.
 - Empty-catch stations can have `commonname = NA`.
-- Some operations aren't supported lazily in DuckDB — if a verb errors, `collect()` the
-  minimal subset first, then finish in R.
+- Some operations aren't supported lazily in DuckDB — if a verb errors, reduce/aggregate as
+  much as possible first, then `collect()` the **minimal** subset and finish in R.
+- **Memory:** never `collect()` a whole table; do max/mean/count in DuckDB; count + estimate
+  before a large collect and ask the user. See
+  [`../../knowledge/performance.md`](../../knowledge/performance.md).
 - **Privacy:** show the user aggregates/derived results; never paste large raw extracts into
   the chat or write them to committed files.

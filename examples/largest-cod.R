@@ -1,4 +1,6 @@
 ## Largest cod in the database — mirrors cookbook/largest-cod.md
+## Reports BOTH the longest and the heaviest cod, computing the max in DuckDB so only the
+## matching row(s) are pulled into R (never collect all cod — see knowledge/performance.md).
 ## Requires a local DuckDB at ~/IMR_biotic_BES_database/bioticexplorer.duckdb
 
 library(tidyverse)
@@ -10,13 +12,22 @@ con <- dbConnect(duckdb::duckdb(),
                  read_only = TRUE)
 indall <- tbl(con, "indall")
 
-biggest <- indall |>
+# Longest cod — max computed in DuckDB; only the matching row(s) come back
+longest <- indall |>
   filter(commonname == "torsk", !is.na(length)) |>
-  slice_max(length, n = 1, with_ties = FALSE) |>
+  filter(length == max(length, na.rm = TRUE)) |>
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
   collect() |>
   mutate(length_cm = length * 100)   # length is in metres
 
-print(biggest |>
-  select(startyear, cruise, serialnumber, length_cm, individualweight, age, sex))
+# Heaviest cod
+heaviest <- indall |>
+  filter(commonname == "torsk", !is.na(individualweight)) |>
+  filter(individualweight == max(individualweight, na.rm = TRUE)) |>
+  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
+  collect()
+
+print(longest)
+print(heaviest)
 
 dbDisconnect(con, shutdown = TRUE)
