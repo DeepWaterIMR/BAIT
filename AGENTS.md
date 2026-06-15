@@ -91,6 +91,9 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 5. **Query within memory limits** — aggregate/filter in DuckDB and `collect()` only the small
    final result; **never `collect()` a whole table**. For large/unknown results, count and
    estimate first, and warn/ask before pulling a lot into RAM. See `knowledge/performance.md`.
+6. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
+   is usually a data-entry error. Pull the top ~10, flag implausible records for the user, and
+   report the largest *plausible* one — never the raw max. See `knowledge/data-quality.md`.
 
 ## Learning loop
 

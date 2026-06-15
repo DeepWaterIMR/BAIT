@@ -20,27 +20,38 @@ description: Turn a natural-language question about IMR Biotic data into a tidyv
    query of unknown size, **count first, estimate memory, and ask before a large collect.**
 6. **Report units correctly:** `length` is metres (×100 for cm), weights are kg.
 7. **Answer the whole question.** "Largest" is ambiguous → give **both** longest and heaviest.
-8. If the question is new, **offer to save a cookbook recipe** (see `../../CONTRIBUTING.md`).
+8. **Sanity-check extremes for data-entry errors.** The single `max()` is the record most
+   likely to be a typo. Pull the **top ~10**, check against biology / Fulton's K, tell the user
+   about likely typos, and report the largest **plausible** record — never the raw max. See
+   [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md).
+9. If the question is new, **offer to save a cookbook recipe** (see `../../CONTRIBUTING.md`).
 
 ## Patterns
 
-**Largest / extreme value — reduce in DuckDB, and report both length and weight**
+**Largest / extreme value — pull the top N, sanity-check, report the largest *plausible* row**
+The single max is the record most likely to be a data-entry error. Pull the **top ~10**
+(cheap — still reduced in DuckDB), flag implausible rows, and answer with the largest plausible
+one. Report both length and weight, since "largest" is ambiguous.
 ```r
-# longest
-longest <- indall |>
-  filter(commonname == "torsk", !is.na(length)) |>
-  filter(length == max(length, na.rm = TRUE)) |>          # max computed in DuckDB
-  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
-  collect() |> mutate(length_cm = length * 100)           # length is in metres
-
-# heaviest
-heaviest <- indall |>
+# Top heaviest candidates, descending — only N rows collected
+cand <- indall |>
   filter(commonname == "torsk", !is.na(individualweight)) |>
-  filter(individualweight == max(individualweight, na.rm = TRUE)) |>
-  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
-  collect()
+  slice_max(individualweight, n = 10) |>
+  select(startyear, serialnumber, length, individualweight, age, sex) |>
+  collect() |>
+  mutate(
+    length_cm = length * 100,
+    K = 100 * (individualweight * 1000) / (length_cm)^3,   # Fulton's K (~0.8–1.5 for cod)
+    flag = is.na(K) | K < 0.4 | K > 3 | individualweight > 60   # tune per species
+  )
+
+cand                                                       # inspect: flagged = suspected typos
+heaviest <- cand |> filter(!flag) |> slice_max(individualweight, n = 1)  # the real answer
+# Do the same for `length` (longest), flagging against a plausible max length for the species.
 ```
-Don't `collect()` all cod and take the max in R — that pulls millions of rows. See the recipe
+Don't `collect()` all cod and take the max in R — that pulls millions of rows. Don't report the
+raw `max()` either — it may be a typo. See
+[`../../knowledge/data-quality.md`](../../knowledge/data-quality.md) and the recipe
 [`../../cookbook/largest-cod.md`](../../cookbook/largest-cod.md).
 
 **Filter to research surveys**
@@ -74,5 +85,9 @@ the worked recipe [`../../cookbook/map-cusk-eggan.md`](../../cookbook/map-cusk-e
 - **Memory:** never `collect()` a whole table; do max/mean/count in DuckDB; count + estimate
   before a large collect and ask the user. See
   [`../../knowledge/performance.md`](../../knowledge/performance.md).
+- **Data-entry errors:** the extreme tail is where typos hide (a 179 cm cod, an 18 100 kg
+  fish). Never report the raw `max()` as "the largest"; pull the top ~10, flag the implausible
+  ones for the user, and answer with the largest plausible record. See
+  [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md).
 - **Privacy:** show the user aggregates/derived results; never paste large raw extracts into
   the chat or write them to committed files.
