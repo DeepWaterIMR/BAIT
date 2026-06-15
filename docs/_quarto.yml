@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "BAIT — Biotic AI Toolkit"
+  description: "Teach your AI agent to work with IMR Biotic data — safely, on your machine."
+  site-url: "https://deepwaterimr.github.io/BAIT/"
+  repo-url: "https://github.com/DeepWaterIMR/BAIT"
+  navbar:
+    background: primary
+    left:
+      - href: index.qmd
+        text: Home
+      - href: getting-started.qmd
+        text: Getting started
+      - href: examples.qmd
+        text: Example queries
+      - href: privacy.qmd
+        text: Privacy
+    right:
+      - icon: github
+        href: https://github.com/DeepWaterIMR/BAIT
+  page-footer:
+    center: "BAIT · DeepWaterIMR · Institute of Marine Research"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    code-overflow: wrap
+
+# This site is documentation only; do not execute R against the database.
+execute:
+  enabled: false

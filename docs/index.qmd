@@ -1,0 +1,45 @@
+---
+title: "🎣 BAIT — Biotic AI Toolkit"
+subtitle: "Biotic goes agentic"
+---
+
+**BAIT teaches your AI coding agent (Claude Code, Codex, Cursor, …) to work with the IMR
+Biotic database — and keeps your raw data on your own machine.**
+
+Ask in plain language:
+
+> *"Set up the Biotic database."*
+> *"What is the largest cod in the database?"*
+> *"Make a map of cusk caught on the EggaN surveys."*
+> *"Make a maturity ogive for ling using Coastal survey data."*
+
+…and your agent writes the R, runs it locally, and shows you the result.
+
+## What it does
+
+1. **Installs & maintains** the Biotic database ([BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer)).
+2. **Connects** from R with tidyverse syntax (read-only DuckDB).
+3. **Answers data questions** by translating them into queries.
+4. **Makes maps, plots, life-history analyses, and dashboards** with
+   [ggplot2](https://ggplot2.tidyverse.org/),
+   [ggOceanMaps](https://mikkovihtakari.github.io/ggOceanMaps/),
+   [leaflet](https://rstudio.github.io/leaflet/),
+   [ggFishPlots](https://deepwaterimr.github.io/ggFishPlots/), and
+   [BioticExplorer](https://github.com/DeepWaterIMR/BioticExplorer)/Shiny.
+
+## It is **not** a trained model
+
+Your data never leaves your computer and never enters any model's weights. The agent simply
+*reads the BAIT repository* while it helps you. See [Privacy](privacy.qmd).
+
+## Get going
+
+- New here? → [Getting started](getting-started.qmd)
+- Want ideas? → [Example queries](examples.qmd)
+- Worried about data? → [Privacy](privacy.qmd) *(read this first)*
+
+::: {.callout-tip}
+## Hosting a KI-kaffe?
+This whole thing pairs with the session **"Biotic goes agentic."** Clone the repo, open
+your agent in the folder, and demo the example queries live.
+:::

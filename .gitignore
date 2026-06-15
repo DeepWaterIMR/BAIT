@@ -1,0 +1,57 @@
+# BAIT holds INSTRUCTIONS ONLY — never data. These rules are a safety net so that
+# raw Biotic data can never be committed by accident. Do not loosen them.
+
+# --- Raw / intermediate data of any kind ---
+*.rds
+*.rda
+*.RData
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.db
+*.xml
+*.xlsx
+*.xls
+*.csv
+*.tsv
+*.parquet
+*.feather
+
+# --- Working directories where data/outputs might land ---
+data/
+outputs/
+output/
+results/
+private/
+scratch/
+
+# --- Rendered figures (may contain station maps / coordinates) ---
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.tif
+*.tiff
+# keep small site/logo assets explicitly with: git add -f docs/assets/...
+
+# --- R / RStudio cruft ---
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# --- Quarto / site build ---
+docs/_site/
+docs/.quarto/
+/_site/
+/.quarto/
+# Stray renders of top-level .md (e.g. if README.md is rendered by mistake)
+*.html
+/*_files/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

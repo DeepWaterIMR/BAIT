@@ -1,0 +1,55 @@
+---
+title: "Getting started"
+---
+
+## 1. Pick an agent
+
+Any capable coding agent works: [Claude Code](https://claude.com/claude-code),
+[Codex](https://openai.com/codex), Cursor, Gemini CLI, … BAIT ships entry points for all of
+them (`CLAUDE.md` for Claude Code, `AGENTS.md` for the others).
+
+## 2. Turn off training — *before* touching data
+
+This is the one step you must not skip. In your agent's privacy / data-controls settings,
+disable model training / enable zero-data-retention. BAIT walks you through it; the principle
+is in [Privacy](privacy.qmd). When in doubt, prefer API/enterprise tiers with zero data
+retention over consumer tiers.
+
+## 3. Install BAIT — one prompt
+
+In your agent, just say:
+
+```
+install https://github.com/DeepWaterIMR/BAIT
+```
+
+The agent takes it from there and walks you through:
+
+1. **Privacy gate** — confirms model training is off (and shows you how to turn it off if
+   needed).
+2. **Clones BAIT** to a sensible location — and *refuses to install at a drive root* like
+   `C:\` for security; it suggests a safe place in your home folder.
+3. **Installs the skills globally**, so BAIT works in **every** project without re-cloning.
+4. **Sets up the database** (asks first — it's a big download). You'll need IMR network
+   access (VPN / HI-Adm Wi-Fi) and >2 GB of disk; the download runs in the background with a
+   log and can take **hours**. *Don't* run it over mobile internet or Starlink. The database
+   lands at `~/IMR_biotic_BES_database/` — outside any repo, on purpose. Intranet is only
+   needed for downloading/updating; querying is fully offline.
+5. **Verifies the connection** and shows you an example.
+
+## 4. Ask your first question
+
+> *"What is the largest cod in the database?"*
+
+Browse more in [Example queries](examples.qmd).
+
+## Keeping BAIT current
+
+Say *"update BAIT"* — the agent runs `git pull`, re-syncs the global skills, and can refresh
+the database (a fresh download, intranet required).
+
+## How it learns
+
+When you ask something new, the agent offers to save the solution as a **cookbook recipe**.
+Review it, commit it, and the next person's agent benefits. The cookbook is IMR's shared,
+version-controlled memory — BAIT gets better the more it's used.

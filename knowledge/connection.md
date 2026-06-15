@@ -1,0 +1,73 @@
+# Connecting to the Biotic database (R + tidyverse)
+
+The IMR Biotic database is a **DuckDB** file built by
+[BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer). Default
+location:
+
+```
+~/IMR_biotic_BES_database/bioticexplorer.duckdb
+```
+
+> ⚠️ The old `MonetDB.R` connection pattern (seen in some legacy scripts) is **obsolete**.
+> The database migrated to DuckDB in 2025. Always use the `duckdb` driver below.
+
+## Canonical connection (copy this)
+
+```r
+library(tidyverse)
+library(DBI)
+library(duckdb)
+
+db_path <- path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+
+# Read-only: we never modify the database from BAIT.
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
+
+# Lazy table references — no data is pulled yet.
+mission <- dplyr::tbl(con, "mission")
+stnall  <- dplyr::tbl(con, "stnall")   # mission + fishstation + catchsample
+indall  <- dplyr::tbl(con, "indall")   # stnall + individual + (preferred) agedetermination
+# ageall <- dplyr::tbl(con, "ageall")  # one row per age reading (if present)
+```
+
+## Golden rules
+
+1. **Always `read_only = TRUE`.** BAIT reads; it never writes the database.
+2. **Build the query lazily, then `collect()` once at the end.** DuckDB does the filtering;
+   only the final (small) result is pulled into R memory. Never `collect()` a whole table.
+3. **Disconnect when done:**
+   ```r
+   DBI::dbDisconnect(con, shutdown = TRUE)
+   ```
+4. **Check columns before guessing.** Column sets can evolve:
+   ```r
+   colnames(stnall)   # works on a lazy tbl
+   colnames(indall)
+   ```
+   Use [`field-glossary.md`](field-glossary.md) to map plain English → column names.
+
+## Lazy → collect pattern
+
+```r
+result <- stnall |>
+  filter(commonname == "torsk", missiontype %in% c(4, 5)) |>   # filter in DuckDB
+  select(startyear, serialnumber, longitudestart, latitudestart, catchweight) |>
+  collect()                                                     # pull final result only
+```
+
+## Two ways to get data, same shape
+
+- **Database mode** (this file): query the compiled DuckDB. Best for cross-cruise questions.
+- **File mode**: parse local NMD Biotic v3 XML with
+  `RstoxUtils::processBioticFile()` / `processBioticFiles()`, which return the same
+  `$mission`/`$stnall`/`$indall` structure. Best when you have a few XML files and no
+  database. See [`packages.md`](packages.md).
+
+## Troubleshooting
+
+- **File not found** → the database isn't installed yet. See
+  [`../skills/biotic-server-setup/SKILL.md`](../skills/biotic-server-setup/SKILL.md).
+- **`duckdb` version mismatch on open** → the DuckDB file format is tied to the `duckdb` R
+  package version it was written with. Update the package (`install.packages("duckdb")`) or
+  rebuild the database with a matching version.
+- **Locked database** → close other R sessions / BioticExplorer instances using the file.

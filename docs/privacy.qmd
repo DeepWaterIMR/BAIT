@@ -1,0 +1,66 @@
+---
+title: "Privacy & data handling"
+---
+
+::: {.callout-important}
+## The promise
+Biotic data is confidential, and some of it is sensitive (e.g. Russian-zone data, exact
+positions of vulnerable species). **BAIT is built so your raw data stays on your machine and
+never trains a model.**
+:::
+
+## Why an AI agent doesn't "train on" your data
+
+A coding agent reads files to help you in the moment — it does **not** update any model's
+weights. Training would only happen if **both** of these were true:
+
+1. data is **sent** to a model provider, **and**
+2. that provider is **allowed to retain/train** on it.
+
+BAIT closes both doors: it keeps data local, and it reminds you to turn provider training
+**off**.
+
+## Before you start — the pre-flight
+
+1. **Turn training / data retention OFF** for your agent (see below).
+2. The **database lives outside any repo** (`~/IMR_biotic_BES_database/`).
+3. You're in a folder that **won't be committed with data** — BAIT's `.gitignore` /
+   `.claudeignore` block data files as a safety net.
+4. For **sensitive subsets**, agree up front on what may be produced or shared.
+
+## Turning training off (verify the current setting)
+
+Menus change, so confirm on your provider's current privacy / data-controls page:
+
+- **Claude / Claude Code:** disable the "help improve Claude" / training option (consumer);
+  API / Team / Enterprise inputs aren't used for training by default, with zero-data-
+  retention available.
+- **OpenAI / Codex / ChatGPT:** Data Controls → turn off model-training; API isn't trained on
+  by default, ZDR available on eligible accounts.
+- **Other agents:** enable the equivalent "privacy mode" / "do not train" / ZDR setting.
+
+When in doubt, prefer API / enterprise tiers with zero data retention.
+
+## What's safe to share
+
+| Output | Generally OK to share? |
+|---|---|
+| Aggregates, counts, summaries | ✅ |
+| Model parameters (L50, L∞, K, a/b) | ✅ |
+| Figures & maps (non-sensitive areas) | ✅ usually |
+| Maps of sensitive positions | ⚠️ aggregate/jitter; ask first |
+| Raw individual records | ❌ keep local |
+| Anything Russian-zone / protected-species, position-level | ❌ ask first |
+
+## Dashboards
+
+Run them **locally**. Never deploy Biotic data to a public host (e.g. shinyapps.io). If you
+need hosting, it must be inside IMR infrastructure with access control.
+
+## If something leaks
+
+Stop, tell your data manager, delete the exposed copy, and rotate any shared access. Data
+sent to an external service may persist even after deletion — act per IMR policy.
+
+*Full operational detail lives in the repo:
+[`skills/biotic-privacy/SKILL.md`](https://github.com/DeepWaterIMR/BAIT/blob/main/skills/biotic-privacy/SKILL.md).*

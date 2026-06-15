@@ -1,0 +1,46 @@
+---
+title: "Example queries"
+---
+
+Things you can ask your agent once BAIT is loaded. Each links to the matching **cookbook
+recipe** (the standardized answer the agent uses and adapts).
+
+## Data questions
+
+- **"What is the largest cod in the database?"**
+  → [`largest-cod`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/largest-cod.md)
+- "How many haddock were measured per year on the surveys?"
+- "Which cruises sampled Greenland halibut in 2023?"
+- "List the species caught on the winter survey."
+
+## Maps
+
+- **"Make a map of cusk caught on the EggaN surveys."**
+  → [`map-cusk-eggan`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/map-cusk-eggan.md)
+- **"Map all spurdog in ICES areas 1 and 2."**
+  → [`pigghaa-ices-1-2`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/pigghaa-ices-1-2.md)
+- "Interactive leaflet map of cod catches, coloured by year."
+- "Catch-composition pie charts per station for the coastal survey."
+
+## Life-history
+
+- **"Make a maturity ogive for ling using Coastal survey data."**
+  → [`maturity-ogive-ling-coastal`](https://github.com/DeepWaterIMR/BAIT/blob/main/cookbook/maturity-ogive-ling-coastal.md)
+- "Fit a von Bertalanffy growth curve for redfish and give me L∞ and K."
+- "Length–weight relationship for saithe, with the a and b parameters."
+
+## Dashboards
+
+- "Launch BioticExplorer so I can browse the data."
+- "Build me a small Shiny dashboard to filter catches by species and map them."
+
+## Maintenance
+
+- "Set up the Biotic database."
+- "Update the database to the latest data."
+
+::: {.callout-note}
+## The list grows
+Every new question your team solves can become a recipe. See
+[Contributing](https://github.com/DeepWaterIMR/BAIT/blob/main/CONTRIBUTING.md).
+:::
