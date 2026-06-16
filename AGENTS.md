@@ -59,6 +59,15 @@ instructions at the saved `bait_path` and read the skills from there.
   cloning the URL, immediately check `~/.bait/config.json`; if it points to a valid existing
   install, reuse that path and clean up any accidental duplicate clone from the current
   workspace after verifying it has no user changes.
+- **Stay current (best-effort, at most once a day).** The first time you reach for a
+  `biotic-*` skill in a session, do a quick update check — but never let it delay the user's
+  task. Read `bait_path` from `~/.bait/config.json` (skip silently if there's no config or no
+  git). Look at the marker `~/.bait/.last-update-check`: if it was written under ~24h ago,
+  skip; otherwise write the current time to it and check whether the repo is **behind** its
+  remote (`git -C "<bait_path>" fetch` then compare `HEAD` with `@{u}` — adapt the commands to
+  the OS). If behind, tell the user once they can run the `bait-update` skill;
+  **only report — never pull automatically.** If you're offline or anything errors, skip
+  silently — this is a convenience, not a gate.
 - **🔒 Never install BAIT or the database at a filesystem root / system directory** (`/`,
   `C:\`, …). If asked, refuse and suggest a safe user-space location.
 
