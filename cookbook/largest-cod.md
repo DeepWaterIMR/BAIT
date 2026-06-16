@@ -95,8 +95,17 @@ longest_cand <- indall |>
 longest_cand                                               # inspect; NA weight = can't cross-check
 longest <- longest_cand |> filter(!flag) |> slice_max(length, n = 1)
 
+# --- DECODE before reporting: sex is a code, not a label (1 = Female, 2 = Male) ---
+sex_lab <- c("1" = "Female", "2" = "Male", "3" = "Intersex", "4" = "Hermaphroditic")
+heaviest <- heaviest |> mutate(sex = dplyr::recode(as.character(sex), !!!sex_lab))
+longest  <- longest  |> mutate(sex = dplyr::recode(as.character(sex), !!!sex_lab))
+
 dbDisconnect(con, shutdown = TRUE)
 ```
+
+> **Decode codes before you report them.** `sex` is a NMDreference code — reporting `sex = 1`
+> as "male" is a real mistake to avoid (`1 = Female`). See
+> [`../knowledge/reference-codes.md`](../knowledge/reference-codes.md).
 
 ## Expected output
 

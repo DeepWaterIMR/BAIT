@@ -83,15 +83,21 @@ Surveys go by **nicknames** (EggaN, Kysttokt, …). Map a nickname to a search t
 `name` strings and codes — **add a row whenever you learn or are taught a new one**, and
 verify the search term against `csindex` before relying on it.
 
-| Survey (nickname) | `csindex$name` contains | Notes |
-|---|---|---|
-| EggaN | "continental" slope, **north** | Slope survey, Norwegian Sea / N |
-| EggaS | "continental" slope, **south** | Slope survey, southern part |
-| Coastal survey (Kysttokt) | "coastal" / "kyst" | Coastal cod, ling, etc. |
-| Winter survey (Vintertokt) | "winter" | Barents Sea winter |
-| Ecosystem survey (Økosystemtokt) | "ecosystem" | Barents Sea autumn |
-| Shrimp survey (Reketokt) | "shrimp" / "reke" | |
-| Spurdog survey (Pigghåtokt) | "spurdog" / "pigghå" | |
+| Survey (nickname) | `csindex$name` contains | Code | Notes |
+|---|---|---|---|
+| EggaN | "continental" slope … **"autumn"** | 16 | Norwegian Sea slope, deep-sea fish; user-confirmed |
+| EggaS | "continental" slope … **"spring"** | 25 | The other slope series |
+| Coastal survey (Kysttokt) | "coastal" / "kyst" | | Coastal cod, ling, etc. |
+| Winter survey (Vintertokt) | "winter" | | Barents Sea winter |
+| Ecosystem survey (Økosystemtokt) | "ecosystem" | | Barents Sea autumn |
+| Shrimp survey (Reketokt) | "shrimp" / "reke" | | |
+| Spurdog survey (Pigghåtokt) | "spurdog" / "pigghå" | | |
+
+> ⚠️ The Egga slope surveys are **stored by season, not compass direction**: the `name`
+> strings are *"…continental slope NOR deep-sea fish cruise in autumn"* (EggaN, code 16) and
+> *"…in spring"* (EggaS, code 25). Grepping `csindex$name` for "north"/"south" returns
+> **nothing** — match on "continental" (both) then split by "autumn"/"spring", or filter on
+> the code directly. Always confirm against `csindex` before relying on a code.
 
 ## `missiontype` — survey vs. commercial
 
@@ -107,5 +113,15 @@ verify the search term against `csindex` before relying on it.
   `"27.1"`, `"27.2.a"`. Filter with `%like%` / `grepl()` on the prefix.
 - **`gear`** — numeric code; the `gearindex` table (built into the database) resolves
   code → gear name/category.
-- Other coded fields (maturity stage, sex, readability…) are NMDreference foreign keys;
-  see [`field-glossary.md`](field-glossary.md) for which fields are codes.
+- Other coded fields (maturity stage, sex, readability…) are NMDreference foreign keys.
+  [`field-glossary.md`](field-glossary.md) flags which fields are codes (**code? = yes**);
+  resolve them with [`reference-codes.md`](reference-codes.md) — e.g. `sex` `1 = Female`,
+  `2 = Male`, `3 = Intersex`, `4 = Hermaphroditic`.
+
+### Greenland halibut sex on the Egga surveys
+
+For **`blåkveite` (Greenland halibut)** on EggaN/EggaS, sex has historically been recorded in
+`catchpartnumber` ("delnummer") rather than `sex`: `catchpartnumber == 1` → female,
+`== 2` → male. So when `sex` is `NA` for Greenland halibut on these surveys, back-fill it from
+`catchpartnumber`; for other species/surveys a missing `sex` is simply not recorded. See
+[`reference-codes.md`](reference-codes.md).

@@ -87,6 +87,23 @@ Never skip this step, even if BAIT is already partly installed.
      ```
    - For agents without a global-skills mechanism (e.g. Codex), instead point the agent's
      project/agent instructions at `<bait_path>` and rely on the saved config + memory.
+8. **Link the shared `knowledge/` so the global skills can read it.** The skills reference
+   `../../knowledge/`, which from `~/.claude/skills/<skill>/` resolves to `~/.claude/knowledge`.
+   **Symlink** that to the repo's `knowledge/` so it stays current with every `git pull` — no
+   separate copy to go stale:
+   - macOS/Linux:
+     ```bash
+     ln -sfn "<bait_path>/knowledge" ~/.claude/knowledge
+     ```
+   - Windows (PowerShell, Developer Mode or admin):
+     ```powershell
+     New-Item -ItemType SymbolicLink -Force -Path "$HOME/.claude/knowledge" -Target "<bait_path>/knowledge"
+     ```
+     If symlinks aren't permitted, copy instead — but then it must be **re-copied on every
+     update** (it won't track `git pull`):
+     `Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.claude/knowledge"`.
+   - Remove any stale `~/.claude/skills/knowledge` left by older installs (wrong level — the
+     links resolve to `~/.claude/knowledge`, not inside `skills/`).
 
 After this, the keyword **"biotic"** (and tasks like maps/maturity ogives on Biotic data)
 should make you reach for the `biotic-*` skills automatically, in any project.

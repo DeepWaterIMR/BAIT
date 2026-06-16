@@ -19,6 +19,9 @@ description: Turn a natural-language question about IMR Biotic data into a tidyv
    **Never `collect()` a whole table** (millions of rows can freeze the machine), and for any
    query of unknown size, **count first, estimate memory, and ask before a large collect.**
 6. **Report units correctly:** `length` is metres (×100 for cm), weights are kg.
+   **Decode coded columns** before showing them to the user — `sex`, `maturationstage`, etc.
+   are codes, not labels (`sex 1 = Female`, `2 = Male`). See
+   [`../../knowledge/reference-codes.md`](../../knowledge/reference-codes.md).
 7. **Answer the whole question.** "Largest" is ambiguous → give **both** longest and heaviest.
 8. **Sanity-check extremes for data-entry errors.** The single `max()` is the record most
    likely to be a typo. Pull the **top ~10**, check against biology / Fulton's K, tell the user

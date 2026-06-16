@@ -30,6 +30,15 @@ toolkit.
      ```
    - This overwrites the BAIT-managed skills under `~/.claude/skills/` with the latest. It
      does not touch unrelated skills the user has there.
+   - **Knowledge needs no re-copy if it's a symlink.** `~/.claude/knowledge` should be a
+     symlink to `<bait_path>/knowledge` (set up by `bait-install`), so the `git pull` above
+     already refreshed it. Just make sure the link exists and points at the repo:
+     ```bash
+     [ -L ~/.claude/knowledge ] || ln -sfn "<bait_path>/knowledge" ~/.claude/knowledge
+     rm -rf ~/.claude/skills/knowledge   # remove stale misplaced copy from older installs
+     ```
+     On Windows, if knowledge was **copied** rather than symlinked, re-copy it now:
+     `Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.claude/knowledge"`.
 4. If the field glossary source (the XSD) or `scripts/distill_xsd.R` changed, offer to
    regenerate `knowledge/field-glossary.md`:
    ```bash
