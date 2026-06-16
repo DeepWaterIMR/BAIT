@@ -12,10 +12,42 @@ are the rows flagged **code? = yes** (type `KeyType` / `CompositeTaxa*KeyType`).
 
 ## Order of preference
 
-1. **In-database index tables first** (no network, works offline): `taxaindex` (species),
-   `csindex` (cruise series), `gearindex` (gear). See `species-and-surveys.md`.
-2. **The IMR Reference API** for everything else (`sex`, `maturationstage`, …). It is the
-   canonical registry the database codes point into.
+1. **In-database index tables first** (no network, works offline). Resolution is a SQL
+   **join**, so it costs no tokens — you never read the mapping into context:
+   - `taxaindex` (species), `csindex` (cruise series), `gearindex` (gear) — see
+     `species-and-surveys.md`.
+   - **`codeindex`** — the simple coded `KeyType` fields (`sex`, `maturationstage`,
+     `missiontype`, `nation`, …) in one long table. See *Resolving from `codeindex`* below.
+2. **Cached common codes in this file** (the *sex* table below) — only the few tiny, hot
+   codes you need *in context* to phrase an answer, and the offline fallback when an older
+   database predates `codeindex`. Not a full registry; don't grow it into one.
+3. **The IMR Reference API** — last resort, on-network only, for anything the DB and the cache
+   don't cover (notably the composite taxa/sex-keyed tables: `specialstage`, `eggstage`,
+   `moultingstage`, `spawningfrequency`).
+
+## Resolving from `codeindex` (preferred, offline)
+
+Databases built with BioticExplorerServer ≥ 0.7.0 carry a `codeindex` table:
+`reftable | code | shortname | description`. Decode a coded column by joining on it — keep the
+join lazy in DuckDB and only `collect()` the small result:
+
+```r
+# Decode `sex` on a result without ever hard-coding the mapping
+sexcodes <- dplyr::tbl(con, "codeindex") |>
+  dplyr::filter(reftable == "sex") |>
+  dplyr::select(sex = code, sexname = shortname)
+
+dplyr::tbl(con, "indall") |>
+  dplyr::filter(commonname == "torsk") |>
+  dplyr::mutate(sex = as.character(sex)) |>      # codeindex$code is character
+  dplyr::left_join(sexcodes, by = "sex") |>
+  dplyr::count(sexname) |>
+  dplyr::collect()
+```
+
+`codeindex` is built by `prepareReferenceCodes()` and excludes editor-identity columns by
+design. If `dplyr::tbl(con, "codeindex")` errors, the database is older — fall back to the
+cached codes below or the API.
 
 ## The IMR Reference API (read-only)
 
@@ -74,9 +106,10 @@ directly: `sex`, `maturationstage`, `nation`, `missiontype`, …).
 
 ## Cached common codes
 
-Small, stable lookups worth keeping inline so a query can decode without a network call.
-**Verify against the API if a value looks off** — the registry is the source of truth and can
-change.
+A few tiny, stable lookups kept inline so you can decode them *in context* without a join or a
+network call. Prefer `codeindex` for anything you're decoding in a pipeline; use these only
+when you need the meaning to phrase the answer. **Verify against the API if a value looks
+off** — the registry is the source of truth and can change.
 
 ### `sex` (in `indall`)
 
@@ -96,8 +129,9 @@ change.
 > `2 = male`. Only apply this back-fill for Greenland halibut on EggaN/EggaS; elsewhere a
 > missing `sex` is just missing. See `species-and-surveys.md`.
 
-Add other tables here as you confirm them against the API (keep them small — the API is the
-full reference).
+Don't add more tables here — `codeindex` in the database is the full offline reference, and
+the API is the source of truth. This cache is only for the handful of codes you must reason
+about *in context* to write an answer.
 
 ## Security notes for this file
 
@@ -106,6 +140,8 @@ full reference).
 - **Read-only.** Never authenticate or write against it from a BAIT task.
 - Do not paste API responses verbatim into committed files if they carry editor identities
   (`updatedBy`/`insertedBy` hold staff usernames) — keep only the `code → meaning` mapping.
+  `prepareReferenceCodes()` already strips these when building `codeindex`, so the database
+  table is safe; the caution is for anything you copy by hand.
 
 ## Discovery (how this endpoint was found)
 
@@ -118,4 +154,6 @@ gives the OpenAPI spec at `…/v2/v3/api-docs`. The spec lists `GET /tables`,
 
 - `field-glossary.md` — which columns are codes (`code? = yes`).
 - `species-and-surveys.md` — `taxaindex`/`csindex`/`gearindex` in-database lookups.
+- `codeindex` is built by BioticExplorerServer's `prepareReferenceCodes()` (≥ 0.7.0) and
+  written by `compileDatabase()`; rebuild/refresh the database to get it.
 - `../skills/biotic-query/SKILL.md` — decode codes when reporting results to the user.
