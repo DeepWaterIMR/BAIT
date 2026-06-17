@@ -8,6 +8,9 @@ location:
 ~/IMR_biotic_BES_database/bioticexplorer.duckdb
 ```
 
+On Windows, use an explicit path under `Sys.getenv("USERPROFILE")` rather than `~`, because
+R can expand `~` to the Documents folder.
+
 > ⚠️ The old `MonetDB.R` connection pattern (seen in some legacy scripts) is **obsolete**.
 > The database migrated to DuckDB in 2025. Always use the `duckdb` driver below.
 
@@ -18,7 +21,11 @@ library(tidyverse)
 library(DBI)
 library(duckdb)
 
-db_path <- path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+db_path <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+} else {
+  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+}
 
 # Read-only: we never modify the database from BAIT.
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)

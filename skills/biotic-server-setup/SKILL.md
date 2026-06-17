@@ -7,19 +7,29 @@ description: Download, install, update, or maintain the IMR Biotic DuckDB databa
 
 The database is a **DuckDB** file built by
 [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer). Default
-location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). Use the chosen
-`bes_db_path` from `~/.bait/config.json` if BAIT was installed with `bait-install`.
+location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). On Windows, prefer an
+explicit path under `%USERPROFILE%` such as
+`C:/Users/<user>/IMR_biotic_BES_database/bioticexplorer.duckdb`, because R may expand `~` to
+the user's Documents folder. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
+was installed with `bait-install`.
 
 ## 0. Pre-flight (do this before downloading)
 
 1. **🔒 Location check (download = first-time or update).** The database must **not** live at a
    filesystem root or system dir (`/`, `C:\`, `C:\Program Files`, …). If asked to put it
    there, **refuse and suggest a user-space location**. Prefer the default
-   `~/IMR_biotic_BES_database/`; avoid cloud-synced/backup folders (large + sensitive).
+   `~/IMR_biotic_BES_database/` on macOS/Linux, or
+   `%USERPROFILE%\IMR_biotic_BES_database\` on Windows; avoid cloud-synced/backup folders
+   such as OneDrive Documents (large + sensitive).
 2. **🌐 Intranet required (download only).** Building/updating downloads from the **IMR
    intranet** — the user must be on **VPN or HI-Adm Wi-Fi**.
-   - Best-effort check: try to reach an IMR-internal endpoint the download uses (not the public
-     `hi.no`). If unreachable, **ask the user to connect to VPN / HI-Adm before continuing.**
+   - Best-effort check: try to reach `https://biotic-api.hi.no`, the IMR-internal endpoint
+     used by the download (not the public `hi.no`). A 200/404-style HTTP response is enough;
+     DNS/connection failure means the intranet is unreachable. If unreachable, **ask the user
+     to connect to VPN / HI-Adm before continuing.**
+     ```r
+     httr::GET("https://biotic-api.hi.no")
+     ```
    - Note: intranet is needed **only** for downloading (initial setup and updates). Once the
      `.duckdb` exists, querying it is fully offline/local.
 3. **⏱️ Set expectations.** Tell the user the download can take **up to several hours**
@@ -74,11 +84,33 @@ screen -dmS bes_download bash -lc \
 
 **Windows (PowerShell, background process):**
 ```powershell
-$DB = "$HOME\IMR_biotic_BES_database"; New-Item -ItemType Directory -Force $DB | Out-Null
+$DB = Join-Path $env:USERPROFILE "IMR_biotic_BES_database"
+New-Item -ItemType Directory -Force $DB | Out-Null
 $LOG = Join-Path $DB "bes_download_log.log"
-Start-Process -WindowStyle Hidden -FilePath "Rscript" `
-  -ArgumentList '-e','library(BioticExplorerServer); compileDatabase(dbPath="~/IMR_biotic_BES_database")' `
-  -RedirectStandardOutput $LOG -RedirectStandardError "$DB\bes_download_err.log"
+$ERR = Join-Path $DB "bes_download_err.log"
+
+$Rscript = (Get-Command Rscript.exe -ErrorAction SilentlyContinue).Source
+if (-not $Rscript) {
+  $RPath = (Get-ItemProperty "HKLM:\SOFTWARE\R-core\R" -ErrorAction SilentlyContinue).InstallPath
+  if (-not $RPath) {
+    $RPath = (Get-ItemProperty "HKCU:\SOFTWARE\R-core\R" -ErrorAction SilentlyContinue).InstallPath
+  }
+  if ($RPath) { $Rscript = Join-Path $RPath "bin\Rscript.exe" }
+}
+if (-not $Rscript -or -not (Test-Path $Rscript)) {
+  throw "Could not find Rscript.exe. Add R to PATH or set `$Rscript to the full path."
+}
+
+$DB_R = $DB -replace "\\", "/"
+$Script = Join-Path $env:TEMP "bes_compile.R"
+@"
+library(BioticExplorerServer)
+compileDatabase(dbPath = "$DB_R")
+"@ | Out-File -FilePath $Script -Encoding utf8
+
+Start-Process -WindowStyle Hidden -FilePath $Rscript `
+  -ArgumentList $Script `
+  -RedirectStandardOutput $LOG -RedirectStandardError $ERR
 ```
 
 **Monitor it** (the job runs for a long time — check in, don't block):
@@ -88,7 +120,12 @@ tail -n 30 "$LOG"     # progress; screen -ls shows the session; reattach with: s
 Tell the user it's running, roughly how long, and that they can keep working / close the
 terminal. Check the log periodically and report progress or errors. Verify on completion:
 ```r
-file.exists(path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"))
+default_db_dir <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database")
+} else {
+  path.expand("~/IMR_biotic_BES_database")
+}
+file.exists(file.path(default_db_dir, "bioticexplorer.duckdb"))
 ```
 
 ## 3. Update the database (fresh data)
@@ -100,13 +137,19 @@ working database. Run this in the background with logging exactly as in Step 2:
 
 ```r
 library(BioticExplorerServer)
-compileDatabase(dbPath = "~/IMR_biotic_BES_database",
+default_db_dir <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database")
+} else {
+  path.expand("~/IMR_biotic_BES_database")
+}
+
+compileDatabase(dbPath = default_db_dir,
                 dbName = "bioticexplorer-next")          # download to a temp name
 
-unlink(normalizePath("~/IMR_biotic_BES_database/bioticexplorer.duckdb"))
+unlink(file.path(default_db_dir, "bioticexplorer.duckdb"))
 file.rename(
-  normalizePath("~/IMR_biotic_BES_database/bioticexplorer-next.duckdb"),
-  normalizePath("~/IMR_biotic_BES_database/bioticexplorer.duckdb", mustWork = FALSE))
+  file.path(default_db_dir, "bioticexplorer-next.duckdb"),
+  file.path(default_db_dir, "bioticexplorer.duckdb"))
 ```
 
 Only run the `unlink`/`file.rename` swap **after** the log shows the `-next` download finished
@@ -121,6 +164,9 @@ successfully. Quicker but riskier in-place option: `compileDatabase(..., overwri
 - **Disk hygiene.** Remove stale `*-next.duckdb` / `*.wal` and old logs after a successful swap.
 - **Download failed / stalled?** Read `bes_download_log.log`: a connection error usually means
   the intranet dropped (reconnect VPN/HI-Adm and re-run); disk-full means free space (>2 GB).
+- **`utils::menu()` failed in background Rscript?** The target directory was probably not
+  created at the same path that `compileDatabase()` received. On Windows especially, avoid
+  `~`, pre-create `%USERPROFILE%\IMR_biotic_BES_database\`, and pass that exact absolute path.
 
 ## After setup
 

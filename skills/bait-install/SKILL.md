@@ -65,7 +65,9 @@ Never skip this step, even if BAIT is already partly installed.
    git clone https://github.com/DeepWaterIMR/BAIT "<chosen-path>"
    ```
 6. **Record the install** so every future session/project can find it:
-   - Write/merge `~/.bait/config.json`:
+   - Write/merge `~/.bait/config.json`. On Windows, store `bes_db_path` as an explicit
+     `%USERPROFILE%`-based absolute path rather than `~`, because R can expand `~` to
+     Documents. Example macOS/Linux config:
      ```json
      { "bait_path": "<chosen-path>",
        "bes_db_path": "~/IMR_biotic_BES_database/bioticexplorer.duckdb",
@@ -116,10 +118,11 @@ should make you reach for the `biotic-*` skills automatically, in any project.
    `~/IMR_biotic_BES_database/bioticexplorer.duckdb`. If present, skip to Step 4.
 2. **If missing, ask whether to install it.** It's a large download (>2 GB, can take hours).
 3. **If yes, ask for the location** using the **same rules as Step 2** (no root/system dirs;
-   suggest a default). **Strongly recommend the default `~/IMR_biotic_BES_database/`** so the
+   suggest a default). **Strongly recommend the default `~/IMR_biotic_BES_database/` on
+   macOS/Linux, or `%USERPROFILE%\IMR_biotic_BES_database\` on Windows** so the
    BioticExplorer Shiny app can auto-detect it. Also recommend **not** placing the database in
-   a cloud-synced/backup folder (Dropbox, OneDrive, ownCloud) — it's large and sensitive.
-   Record the chosen path in `~/.bait/config.json`.
+   a cloud-synced/backup folder (Dropbox, OneDrive, ownCloud, OneDrive Documents) — it's
+   large and sensitive. Record the chosen path in `~/.bait/config.json`.
 4. **Run the download** via [`../biotic-server-setup/SKILL.md`](../biotic-server-setup/SKILL.md)
    — it handles the intranet check, runs the download as a background/`screen` job with a log,
    monitors it, and swaps in the new database on success.

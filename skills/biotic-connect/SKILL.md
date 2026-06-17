@@ -13,8 +13,14 @@ essentials:
 ```r
 library(tidyverse); library(DBI); library(duckdb)
 
+db_path <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+} else {
+  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+}
+
 con <- DBI::dbConnect(duckdb::duckdb(),
-                      dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
+                      dbdir = db_path,
                       read_only = TRUE)
 
 mission <- dplyr::tbl(con, "mission") # survey information
@@ -32,7 +38,8 @@ result; `DBI::dbDisconnect(con, shutdown = TRUE)` when done. Never `collect()` a
 
 > **Database location:** if BAIT was installed with `bait-install`, the database path is
 > recorded in `~/.bait/config.json` (`bes_db_path`) — prefer it over the default above, since
-> the user may have chosen a different location.
+> the user may have chosen a different location. On Windows, avoid R's `~` expansion for the
+> default path because it can point to Documents rather than the user profile directory.
 
 ## File mode (no database; a few XML files)
 

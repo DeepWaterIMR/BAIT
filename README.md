@@ -29,7 +29,8 @@ Some Biotic data are confidential, and some are sensitive. BAIT is built so the 
 
 - BAIT contains **instructions only — never data**. The `.gitignore`/`.claudeignore` files
   block every common data extension as a safety net.
-- The database lives **outside** this repo (`~/IMR_biotic_BES_database/` by default).
+- The database lives **outside** this repo (`~/IMR_biotic_BES_database/` by default on
+  macOS/Linux; `%USERPROFILE%\IMR_biotic_BES_database\` on Windows).
 - Before you start, **turn off model training / data retention** for your agent — BAIT
   reminds you and walks you through it
   ([`skills/biotic-privacy`](skills/biotic-privacy/SKILL.md)).
