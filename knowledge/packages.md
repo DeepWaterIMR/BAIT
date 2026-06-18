@@ -6,7 +6,7 @@ Use these packages; don't reinvent what they already do.
 
 | Package | Role | Key functions |
 |---|---|---|
-| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | **Builds/maintains** the DuckDB database (run once via the server-setup skill). Bakes the `csindex`/`gearindex`/`taxaindex` lookup tables into the DB | `compileDatabase()` |
+| [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer) | **Builds/maintains** the DuckDB database via the server-setup skill. Bakes the `csindex`/`gearindex`/`taxaindex` lookup tables into the DB | `compileDatabase()` for setup; `updateDatabase()` for updates |
 | [RstoxUtils](https://deepwaterimr.github.io/RstoxUtils/) | Parse NMD Biotic XML; the `stnall`/`indall` flattening logic | `processBioticFile()`, `processBioticFiles()`, `coreDataList()` |
 | [RstoxData](https://github.com/StoXProject/RstoxData) | Low-level NMD Biotic XML reader (used under the hood) | `readXmlFile()` |
 | DBI + duckdb | Database connection | `dbConnect()`, `dplyr::tbl()` |

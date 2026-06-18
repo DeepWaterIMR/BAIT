@@ -1,6 +1,6 @@
 ---
 name: bait-install
-description: Install or set up BAIT (Biotic AI Toolkit) for working with IMR Biotic data. Use when the user says "install BAIT", "install https://github.com/DeepWaterIMR/BAIT", "set up BAIT", or first asks to work with Biotic data and BAIT is not yet installed. Runs the full onboarding: privacy gate, clone BAIT, install skills globally, set up the database, verify the connection.
+description: 'Install or set up BAIT (Biotic AI Toolkit) for working with IMR Biotic data. Use when the user says "install BAIT", "install https://github.com/DeepWaterIMR/BAIT", "set up BAIT", or first asks to work with Biotic data and BAIT is not yet installed. Runs the full onboarding: privacy gate, clone BAIT, install skills globally, set up the database, verify the connection.'
 ---
 
 # Install BAIT
@@ -71,41 +71,47 @@ Never skip this step, even if BAIT is already partly installed.
      ```json
      { "bait_path": "<chosen-path>",
        "bes_db_path": "~/IMR_biotic_BES_database/bioticexplorer.duckdb",
-       "skills_synced_to": "~/.claude/skills",
+       "skills_synced_to": ["~/.claude/skills", "~/.codex/skills"],
        "installed": "<YYYY-MM-DD>" }
      ```
    - **Save to your own long-term memory** that BAIT lives at `<chosen-path>` and what it's
      for, so you recall it across projects. (For Claude Code, note it in user-level memory.)
 7. **Make BAIT work across projects — install the skills globally.** Copy the skill folders
-   into the user-level skills directory so they auto-load in every project:
+   into the user-level directories supported by installed agents:
    - macOS/Linux:
      ```bash
-     mkdir -p ~/.claude/skills && cp -R "<bait_path>/skills/." ~/.claude/skills/
+     mkdir -p ~/.claude/skills ~/.codex/skills
+     cp -R "<bait_path>/skills/." ~/.claude/skills/
+     cp -R "<bait_path>/skills/." ~/.codex/skills/
      ```
    - Windows (PowerShell):
      ```powershell
-     New-Item -ItemType Directory -Force "$HOME/.claude/skills" | Out-Null
+     New-Item -ItemType Directory -Force "$HOME/.claude/skills", "$HOME/.codex/skills" | Out-Null
      Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.claude/skills/"
+     Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.codex/skills/"
      ```
-   - For agents without a global-skills mechanism (e.g. Codex), instead point the agent's
-     project/agent instructions at `<bait_path>` and rely on the saved config + memory.
-8. **Link the shared `knowledge/` so the global skills can read it.** The skills reference
-   `../../knowledge/`, which from `~/.claude/skills/<skill>/` resolves to `~/.claude/knowledge`.
+   - Claude Code uses `~/.claude/skills/`; Codex uses `~/.codex/skills/`. Sync only locations
+     supported by installed agents. For other agents, point project/agent instructions at
+     `<bait_path>` and rely on the saved config.
+8. **Link the shared `knowledge/` so global skills can read it.** Skills reference
+   `../../knowledge/`, resolving to the agent-level `knowledge/` directory.
    **Symlink** that to the repo's `knowledge/` so it stays current with every `git pull` — no
    separate copy to go stale:
    - macOS/Linux:
      ```bash
      ln -sfn "<bait_path>/knowledge" ~/.claude/knowledge
+     ln -sfn "<bait_path>/knowledge" ~/.codex/knowledge
      ```
    - Windows (PowerShell, Developer Mode or admin):
      ```powershell
      New-Item -ItemType SymbolicLink -Force -Path "$HOME/.claude/knowledge" -Target "<bait_path>/knowledge"
+     New-Item -ItemType SymbolicLink -Force -Path "$HOME/.codex/knowledge" -Target "<bait_path>/knowledge"
      ```
      If symlinks aren't permitted, copy instead — but then it must be **re-copied on every
-     update** (it won't track `git pull`):
-     `Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.claude/knowledge"`.
-   - Remove any stale `~/.claude/skills/knowledge` left by older installs (wrong level — the
-     links resolve to `~/.claude/knowledge`, not inside `skills/`).
+     update** (it won't track `git pull`): copy it to the applicable agent-level
+     `knowledge/` directory.
+   - Remove stale `skills/knowledge` directories left by older installs; shared knowledge
+     belongs beside `skills/`, not inside it.
 
 After this, the keyword **"biotic"** (and tasks like maps/maturity ogives on Biotic data)
 should make you reach for the `biotic-*` skills automatically, in any project.
@@ -137,7 +143,7 @@ Confirm [`../biotic-connect/SKILL.md`](../biotic-connect/SKILL.md) actually work
 library(DBI); library(duckdb)
 con <- dbConnect(duckdb::duckdb(),
                  dbdir = path.expand("<bes_db_path>"), read_only = TRUE)
-DBI::dbListTables(con)        # expect: mission, stnall, indall, ageall, metadata, csindex, gearindex
+DBI::dbListTables(con)        # expect core tables plus csindex/gearindex/taxaindex
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
@@ -153,4 +159,4 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 
 Summarise for the user: where BAIT is, that skills are installed globally, where the database
 is, and that **updates** are handled by [`../bait-update/SKILL.md`](../bait-update/SKILL.md)
-(`git pull` + re-sync skills; and database refresh via biotic-server-setup).
+(`git pull` + re-sync skills; and incremental database refresh via biotic-server-setup).

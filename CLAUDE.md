@@ -6,8 +6,9 @@ knowledge pack for the NMD Biotic v3 database. You write **R** using **tidyverse
 syntax. ggplot2 for figures, ggOceanMaps/leaflet for maps, ggFishPlots for
 life-history.
 
-> This file is the entry point for **Claude Code**. The identical guidance for
-> Codex / Cursor / Gemini CLI lives in [`AGENTS.md`](AGENTS.md). Keep the two in sync.
+> This file is the entry point for **Claude Code**. Equivalent guidance for Codex / Cursor /
+> Gemini CLI lives in [`AGENTS.md`](AGENTS.md). Keep substantive guidance in sync while
+> preserving agent-specific links and setup notes.
 
 ---
 
@@ -47,9 +48,9 @@ repo is the memory; it grows as users contribute recipes (see "Learning loop" be
 ## Working across projects (important)
 
 BAIT is meant to be installed **once per machine** and used in **every** project — not cloned
-into each repo. When set up via `bait-install`, the skills are copied to the user-level skills
-folder (`~/.claude/skills/`) and BAIT's location is saved to `~/.bait/config.json` + your
-memory.
+into each repo. When set up via `bait-install`, the skills are copied to supported user-level
+skill folders (`~/.claude/skills/` for Claude Code; `~/.codex/skills/` for Codex), and BAIT's
+location is saved to `~/.bait/config.json`.
 
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or
   requests like maps/queries/maturity ogives on it), reach for the `biotic-*` skills.
@@ -100,6 +101,10 @@ shared source of truth.
    final result; **never `collect()` a whole table**. For large/unknown results, count and
    estimate first, and warn/ask before pulling a lot into RAM. See
    [`knowledge/performance.md`](knowledge/performance.md).
+6. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
+   is usually a data-entry error. Pull the top ~10, flag implausible records for the user, and
+   report the largest *plausible* one — never the raw max. See
+   [`knowledge/data-quality.md`](knowledge/data-quality.md).
 
 ## Learning loop
 

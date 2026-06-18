@@ -37,8 +37,9 @@ indall  <- dplyr::tbl(con, "indall")  # individual fish (stnall + individual + p
 ageall  <- dplyr::tbl(con, "ageall")  # all age readings (one row per reading)
 
 # Reference / lookup tables — small, safe to collect() up front:
-meta     <- dplyr::tbl(con, "metadata") %>%             # when the database was downloaded
-  collect() %>% mutate_all(as.POSIXct)
+meta     <- dplyr::tbl(con, "metadata") %>%             # update/schema information
+  collect() %>%
+  mutate(across(any_of(c("timestart", "timeend")), as.POSIXct))
 csindex  <- dplyr::tbl(con, "csindex")                  # cruise-series index (code -> name)
 gearlist <- dplyr::tbl(con, "gearindex") %>% collect()  # gear index (code -> name/category)
 # taxaindex: taxon/commonname lookup — the PRIMARY source for species names. Present in
@@ -52,9 +53,13 @@ if ("taxaindex" %in% DBI::dbListTables(con))
 
 - **Core** (query lazily, `collect()` the result): `mission`, `stnall`, `indall`, `ageall` —
   see [`data-model.md`](data-model.md).
-- **Reference / lookup** (small; `collect()` up front): `metadata` (build time), `csindex`
+- **Reference / lookup** (small; `collect()` up front): `metadata` (build/update time plus
+  package and database-schema versions), `csindex`
   (cruise-series code → name), `gearindex` (gear code → name/category), and `taxaindex`
   (taxon / `commonname` lookup — see [`species-and-surveys.md`](species-and-surveys.md)).
+- **Administrative**: `source_manifest` stores metadata-only API change signals used by
+  `updateDatabase()`. It is not needed for scientific queries and appears after the first
+  incremental update.
   Inspect what a given database holds with `DBI::dbListTables(con)`.
 
 ## Golden rules

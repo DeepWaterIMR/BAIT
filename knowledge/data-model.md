@@ -73,10 +73,12 @@ front (inspect what's present with `DBI::dbListTables(con)`):
 | `csindex` | cruise-series code → name |
 | `gearindex` | gear code → name / category |
 | `taxaindex` | taxon (`tsn`) → name + synonyms; **primary source for species names** |
-| `metadata` | when the database was built |
+| `metadata` | latest build/update times, package version, schema version, update mode |
+| `source_manifest` | administrative change signals used by `updateDatabase()`; not scientific data |
 
-All four are written into the DuckDB by **BioticExplorerServer** when the database is
-compiled — **query them from the database; don't call BES fetch functions** from BAIT.
+The lookup tables and metadata are written into DuckDB by **BioticExplorerServer**—query
+them from the database; don't call BES fetch functions from BAIT. `source_manifest` is
+created on the first incremental update.
 `taxaindex` is present in databases compiled after the taxa table was added; if it's absent
 in an older database, fall back to the species list in
 [`species-and-surveys.md`](species-and-surveys.md).

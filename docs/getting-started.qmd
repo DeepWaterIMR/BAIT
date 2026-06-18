@@ -46,7 +46,8 @@ Browse more in [Example queries](examples.qmd).
 ## Keeping BAIT current
 
 Say *"update BAIT"* — the agent runs `git pull`, re-syncs the global skills, and can refresh
-the database (a fresh download, intranet required).
+the database with `updateDatabase()` (changed years only in normal operation; intranet
+required). If the database schema changed, BioticExplorerServer safely performs a full rebuild.
 
 ## How it learns
 

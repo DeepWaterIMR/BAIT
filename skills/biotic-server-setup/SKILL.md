@@ -1,6 +1,6 @@
 ---
 name: biotic-server-setup
-description: Download, install, update, or maintain the IMR Biotic DuckDB database with BioticExplorerServer's compileDatabase(). Use when the user wants to set up the database, refresh/update it to newer data, fix a missing or outdated database, or check its location. Handles the intranet check, runs the long download as a monitored background job with a log, and swaps the database safely.
+description: Download, install, update, or maintain the IMR Biotic DuckDB database with BioticExplorerServer. Use compileDatabase() for first-time setup and updateDatabase() for routine refreshes. Use when the user wants to set up the database, update it to newer data, fix a missing or outdated database, or check its location. Handles intranet checks, monitored background jobs, incremental changed-year updates, and safe full rebuilds when schemas change.
 ---
 
 # Set up & maintain the Biotic database
@@ -32,9 +32,10 @@ was installed with `bait-install`.
      ```
    - Note: intranet is needed **only** for downloading (initial setup and updates). Once the
      `.duckdb` exists, querying it is fully offline/local.
-3. **⏱️ Set expectations.** Tell the user the download can take **up to several hours**
-   depending on connection. **Do not** run it over **mobile internet or Starlink** (e.g. on
-   research vessels) — use a stable cable/Wi-Fi intranet connection.
+3. **⏱️ Set expectations.** A first download or schema-triggered full rebuild can take
+   **several hours**. A routine update first checks lightweight delivery metadata and downloads
+   only changed years, so it is usually much faster. **Do not** download over **mobile internet
+   or Starlink** (e.g. on research vessels) — use a stable cable/Wi-Fi intranet connection.
 4. **📦 Package up-to-date check.** Always confirm BioticExplorerServer matches the latest on
    GitHub before a download or update — do **Step 1** first.
 
@@ -62,9 +63,9 @@ utils::compareVersion(remote_ver, local_ver)   # 1 = GitHub newer, 0 = same, -1 
 ```
 
 - Needs **general internet / GitHub** access (separate from the IMR intranet used for the data).
-- **Compile in a fresh R session after an update.** Steps 2–3 launch the download in a new
-  background `Rscript`, so they automatically pick up the just-installed version — don't call
-  `compileDatabase()` in a session that already loaded the old package.
+- **Use a fresh R session after a package update.** Steps 2–3 launch a new background
+  `Rscript`, so they automatically pick up the just-installed version. Do not call
+  `compileDatabase()` or `updateDatabase()` in a session that already loaded the old package.
 - Keep `duckdb` current too (see Maintenance).
 
 ## 2. First-time download — as a monitored background job with a log
@@ -128,12 +129,52 @@ default_db_dir <- if (.Platform$OS.type == "windows") {
 file.exists(file.path(default_db_dir, "bioticexplorer.duckdb"))
 ```
 
-## 3. Update the database (fresh data)
+## 3. Update the database (incremental changed-year refresh)
 
-No change-timestamps upstream ⇒ update = full re-download. Repeat the **pre-flight** first —
-especially **Step 1 (ensure BioticExplorerServer is up to date on GitHub)** and the intranet
-check. **Safe pattern** — build alongside, then swap, so a failed download never destroys the
-working database. Run this in the background with logging exactly as in Step 2:
+Repeat the **pre-flight** first—especially **Step 1** (install the latest
+BioticExplorerServer) and the intranet check. Use `updateDatabase()`, not `compileDatabase()`:
+
+- it checks metadata for each API delivery;
+- downloads and transactionally replaces only changed, added, or removed years;
+- keeps the existing year if downloading, parsing, or writing fails;
+- automatically calls `compileDatabase()` to build, validate, and safely swap a complete
+  sibling database if the package's database schema changed.
+
+Run it as a monitored background job, as for the initial download.
+
+**macOS/Linux:**
+
+```bash
+DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
+LOG="$DB/bes_download_log.log"
+screen -dmS bes_update bash -lc \
+  "Rscript -e 'library(BioticExplorerServer); updateDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
+```
+
+**Windows (PowerShell, after resolving `$Rscript` as in Step 2):**
+
+```powershell
+$DB = Join-Path $env:USERPROFILE "IMR_biotic_BES_database"
+New-Item -ItemType Directory -Force $DB | Out-Null
+$DB_R = $DB -replace "\\", "/"
+$LOG = Join-Path $DB "bes_download_log.log"
+$ERR = Join-Path $DB "bes_download_err.log"
+$Script = Join-Path $env:TEMP "bes_update.R"
+@"
+library(BioticExplorerServer)
+updateDatabase(dbPath = "$DB_R")
+"@ | Out-File -FilePath $Script -Encoding utf8
+Start-Process -WindowStyle Hidden -FilePath $Rscript `
+  -ArgumentList $Script `
+  -RedirectStandardOutput $LOG -RedirectStandardError $ERR
+```
+
+Monitor `bes_download_log.log`. A first update of a legacy database creates a metadata-only
+delivery manifest; it may refresh years changed since the database was built. If the log says
+the schema is incompatible, a full rebuild is expected and the active database remains usable
+until the validated replacement is ready.
+
+Direct foreground use is simply:
 
 ```r
 library(BioticExplorerServer)
@@ -143,17 +184,8 @@ default_db_dir <- if (.Platform$OS.type == "windows") {
   path.expand("~/IMR_biotic_BES_database")
 }
 
-compileDatabase(dbPath = default_db_dir,
-                dbName = "bioticexplorer-next")          # download to a temp name
-
-unlink(file.path(default_db_dir, "bioticexplorer.duckdb"))
-file.rename(
-  file.path(default_db_dir, "bioticexplorer-next.duckdb"),
-  file.path(default_db_dir, "bioticexplorer.duckdb"))
+updateDatabase(dbPath = default_db_dir)
 ```
-
-Only run the `unlink`/`file.rename` swap **after** the log shows the `-next` download finished
-successfully. Quicker but riskier in-place option: `compileDatabase(..., overwrite = TRUE)`.
 
 ## 4. Maintenance & troubleshooting
 
@@ -161,7 +193,8 @@ successfully. Quicker but riskier in-place option: `compileDatabase(..., overwri
   update. `DBI::dbDisconnect(con, shutdown = TRUE)`.
 - **Keep `duckdb` current.** The file format is tied to the writing `duckdb` version;
   mismatches cause open errors. `install.packages("duckdb")`, then rebuild.
-- **Disk hygiene.** Remove stale `*-next.duckdb` / `*.wal` and old logs after a successful swap.
+- **Disk hygiene.** Remove stale `*-next-*.duckdb` / `*.wal` and old logs after a successful
+  update, but never while an update is running.
 - **Download failed / stalled?** Read `bes_download_log.log`: a connection error usually means
   the intranet dropped (reconnect VPN/HI-Adm and re-run); disk-full means free space (>2 GB).
 - **`utils::menu()` failed in background Rscript?** The target directory was probably not

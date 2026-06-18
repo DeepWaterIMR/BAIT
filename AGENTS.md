@@ -6,8 +6,8 @@ knowledge pack for the NMD Biotic v3 database. You write **R** using **tidyverse
 syntax. ggplot2 for figures, ggOceanMaps/leaflet for maps, ggFishPlots for life-history.
 
 > This is the entry point for **Codex, Cursor, Gemini CLI, and other agents**. Claude Code
-> reads the identical guidance in [`CLAUDE.md`](CLAUDE.md). The two files are kept in sync —
-> if you edit one, edit the other.
+> reads the equivalent guidance in [`CLAUDE.md`](CLAUDE.md). Keep substantive guidance in
+> sync while preserving agent-specific links and setup notes.
 
 ---
 
@@ -48,9 +48,9 @@ repo is the memory; it grows as users contribute recipes (see "Learning loop" be
 
 BAIT is meant to be installed **once per machine** and used in **every** project — not cloned
 into each repo. When set up via `bait-install`, BAIT's location is saved to
-`~/.bait/config.json` and (for agents with a global-skills mechanism) the skills are copied to
-the user-level skills folder. For agents without one (e.g. Codex), point your project/agent
-instructions at the saved `bait_path` and read the skills from there.
+`~/.bait/config.json` and, where supported, skills are copied to the agent's user-level skills
+folder (`~/.codex/skills/` for Codex; `~/.claude/skills/` for Claude Code). Other agents can
+read skills from the saved `bait_path` through project/agent instructions.
 
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or
   requests like maps/queries/maturity ogives on it), reach for the `biotic-*` skills.

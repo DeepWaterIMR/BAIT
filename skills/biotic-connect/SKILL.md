@@ -27,8 +27,9 @@ mission <- dplyr::tbl(con, "mission") # survey information
 stnall  <- dplyr::tbl(con, "stnall") # station data
 indall  <- dplyr::tbl(con, "indall") # individual fish data
 ageall <- dplyr::tbl(con, "ageall") # age data
-meta <- dplyr::tbl(con, "metadata") %>% # time of download
-  collect() %>% mutate_all(as.POSIXct)
+meta <- dplyr::tbl(con, "metadata") %>% # update/schema information
+  collect() %>%
+  mutate(across(any_of(c("timestart", "timeend")), as.POSIXct))
 csindex <- dplyr::tbl(con, "csindex") # cruise series index
 gearlist <- dplyr::tbl(con, "gearindex") %>% collect() # gear index
 ```

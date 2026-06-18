@@ -155,5 +155,6 @@ gives the OpenAPI spec at `…/v2/v3/api-docs`. The spec lists `GET /tables`,
 - `field-glossary.md` — which columns are codes (`code? = yes`).
 - `species-and-surveys.md` — `taxaindex`/`csindex`/`gearindex` in-database lookups.
 - `codeindex` is built by BioticExplorerServer's `prepareReferenceCodes()` (≥ 0.7.0) and
-  written by `compileDatabase()`; rebuild/refresh the database to get it.
+  written by `compileDatabase()`. Run `compileDatabase()` once to add it to a legacy database;
+  routine data refreshes use `updateDatabase()`.
 - `../skills/biotic-query/SKILL.md` — decode codes when reporting results to the user.
