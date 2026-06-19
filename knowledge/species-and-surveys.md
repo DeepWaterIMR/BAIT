@@ -89,7 +89,7 @@ verify the search term against `csindex` before relying on it.
 | EggaS | "continental" slope … **"spring"** | 25 | The other slope series |
 | Coastal survey (Kysttokt) | "coastal" / "kyst" | | Coastal cod, ling, etc. |
 | Winter survey (Vintertokt) | "winter" | | Barents Sea winter |
-| Ecosystem survey (Økosystemtokt) | "ecosystem" | | Barents Sea autumn |
+| Ecosystem survey / BESS (Økosystemtokt) | "Barents Sea" + "ecosystem" + **"autumn"** | 6 | user-confirmed; see ambiguity warning below |
 | Shrimp survey (Reketokt) | "shrimp" / "reke" | | |
 | Spurdog survey (Pigghåtokt) | "spurdog" / "pigghå" | | |
 
@@ -98,6 +98,13 @@ verify the search term against `csindex` before relying on it.
 > *"…in spring"* (EggaS, code 25). Grepping `csindex$name` for "north"/"south" returns
 > **nothing** — match on "continental" (both) then split by "autumn"/"spring", or filter on
 > the code directly. Always confirm against `csindex` before relying on a code.
+
+> ⚠️ **"Ecosystem" alone is ambiguous** — `csindex$name` has *five* cruise series containing
+> "ecosystem"/"ecosystem mapping": Barents Sea autumn (code 6, **this is "the Ecosystem
+> survey"/BESS/Økosystemtokt** in normal IMR usage), North Sea Q2_Q3 (8), Norwegian Sea May
+> (17), Porsangerfjorden/Tanafjorden/Kvænangen spring_autumn (26), and Global OneOcean (32).
+> Don't grep "ecosystem" alone and take the first/only hit — filter on "Barents Sea" +
+> "autumn" too, or just use code 6 directly once confirmed against `csindex`.
 
 ## `missiontype` — survey vs. commercial
 
