@@ -59,5 +59,7 @@ d$stnall; d$indall; d$mission   # same shape as the database tables
 - Translate a question into a query → [`../biotic-query/SKILL.md`](../biotic-query/SKILL.md)
 - Tables & columns → [`../../knowledge/data-model.md`](../../knowledge/data-model.md),
   [`../../knowledge/field-glossary.md`](../../knowledge/field-glossary.md)
-- **Before touching data, confirm the privacy pre-flight** →
+- Keep the privacy guidance in mind →
   [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md)
+  Routine local queries should not block on a fresh training-toggle confirmation if
+  onboarding already covered it.

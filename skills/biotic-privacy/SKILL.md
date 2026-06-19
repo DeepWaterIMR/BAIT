@@ -1,6 +1,6 @@
 ---
 name: biotic-privacy
-description: Guide safe handling of confidential/sensitive IMR Biotic data with AI agents — turning off model training/data retention, keeping raw data local, handling Russian-zone and other sensitive data, and deciding what outputs are safe to share. Use before working on Biotic data and whenever a privacy or data-handling question comes up.
+description: Guide safe handling of confidential/sensitive IMR Biotic data with AI agents — turning off model training/data retention, keeping raw data local, handling Russian-zone and other sensitive data, and deciding what outputs are safe to share. Use during install/onboarding, for privacy questions, and for occasional reminders during Biotic work; do not block routine local queries just because the user has not re-confirmed the training toggle in the current chat.
 ---
 
 # Handling Biotic data safely
@@ -13,9 +13,9 @@ machine and never trains a model.** This skill is how you keep that promise.
 > happens if (a) data is sent to a model provider **and** (b) that provider is allowed to
 > retain/train on it. BAIT closes both doors.
 
-## Pre-flight checklist (run before working on Biotic data)
+## Install/onboarding check (blocking, once per machine/agent setup)
 
-Confirm with the user, in order:
+Confirm these during `bait-install` or first-time setup:
 
 1. **Training / data-retention is OFF** for the agent in use (see vendor notes below).
 2. **The database is in its own location** (`~/IMR_biotic_BES_database/`), *outside* any repo
@@ -25,7 +25,29 @@ Confirm with the user, in order:
 4. **For sensitive subsets** (Russian-zone, protected species), the user has agreed on what
    may be produced/shared.
 
-If any is unmet, pause and resolve it before querying data.
+When this is done, record it in `~/.bait/config.json` as `privacy_onboarded_at` (and, if
+useful, `privacy_onboarded_for`). That marker tells future agents the one-time onboarding
+check already happened.
+
+## Routine use (non-blocking)
+
+For ordinary local database queries:
+
+1. **If `~/.bait/config.json` contains `privacy_onboarded_at`, assume the training toggle was
+   already covered during setup.** Do **not** stop and ask again just because a new chat or
+   session started.
+2. **Give a brief reminder only when it adds value**:
+   - the user asks about privacy or data handling;
+   - the task involves unusually sensitive subsets or precise positions;
+   - there is a concrete reason to think the setting changed;
+   - the agent is helping with first-time setup and no onboarding marker exists yet.
+3. **If the marker is missing on an older install, remind rather than block.** Continue with
+   the local query unless another privacy rule would be breached, and write the marker next
+   time `bait-install`/`bait-update` or another config-writing workflow runs.
+
+The thing that must remain hard-blocked is **sending raw data out of the machine**. A missing
+fresh confirmation in the current chat is not, by itself, a reason to block a routine local
+query.
 
 ## Turning off training / retention (verify the current setting — UIs change)
 

@@ -31,8 +31,9 @@ Some Biotic data are confidential, and some are sensitive. BAIT is built so the 
   block every common data extension as a safety net.
 - The database lives **outside** this repo (`~/IMR_biotic_BES_database/` by default on
   macOS/Linux; `%USERPROFILE%\IMR_biotic_BES_database\` on Windows).
-- Before you start, **turn off model training / data retention** for your agent — BAIT
-  reminds you and walks you through it
+- During setup, **turn off model training / data retention** for your agent once — BAIT
+  walks you through it and records that onboarding, then uses reminders rather than blocking
+  every later query
   ([`skills/biotic-privacy`](skills/biotic-privacy/SKILL.md)).
 
 ## 🚀 Quickstart
@@ -44,9 +45,9 @@ Some Biotic data are confidential, and some are sensitive. BAIT is built so the 
    install https://github.com/DeepWaterIMR/BAIT
    ```
    The agent runs [`bait-install`](skills/bait-install/SKILL.md) and walks you through:
-   confirming **model training is off** → cloning BAIT to a sensible place → installing the
-   skills **globally** (so BAIT works in every project) → setting up the database →
-   verifying the connection.
+   a one-time **model training is off** onboarding check → cloning BAIT to a sensible place
+   → installing the skills **globally** (so BAIT works in every project) → setting up the
+   database → verifying the connection.
 3. **Ask away**: *"What's the largest cod in the database?"*, *"Map cusk on EggaN."*
 
 Installed **once per machine**, then available in all your projects. Keep it current with

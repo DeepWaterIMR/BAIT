@@ -11,7 +11,7 @@ syntax. ggplot2 for figures, ggOceanMaps/leaflet for maps, ggFishPlots for life-
 
 ---
 
-## ⛔ PRIVACY — non-negotiable, read before every task
+## ⛔ PRIVACY — non-negotiable, keep in mind on every task
 
 Biotic data is confidential and some of it is sensitive (e.g. Russian-zone data, exact
 positions of vulnerable species). **The whole point of BAIT is that raw data never leaves
@@ -30,9 +30,13 @@ the user's machine.**
    producing or sharing an output.
 5. **Default to derived outputs.** Aggregates, model parameters, and figures are
    generally shareable; raw records are not.
-6. **Remind the user about model training.** Before running tasks on Biotic data, confirm
-   the user has model-training/data-retention turned **off** for the agent they are using.
-   See [`skills/biotic-privacy/SKILL.md`](skills/biotic-privacy/SKILL.md).
+6. **Remind the user about model training, but don't re-gate every query.** Treat
+   model-training/data-retention as a **one-time onboarding check** handled by
+   `skills/bait-install/SKILL.md` and recorded in `~/.bait/config.json`
+   (`privacy_onboarded_at`). If that marker exists, **do not block routine local database
+   queries** on a fresh confirmation in every chat/session. Give a brief reminder only when
+   helpful (e.g. first Biotic task in a long while, privacy questions, or unusually
+   sensitive outputs). See [`skills/biotic-privacy/SKILL.md`](skills/biotic-privacy/SKILL.md).
 
 If a request would breach any of the above, stop and explain rather than comply.
 

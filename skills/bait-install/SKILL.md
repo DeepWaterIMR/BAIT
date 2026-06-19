@@ -13,25 +13,34 @@ moving on.
 
 ---
 
-## Step 1 — Privacy gate (model training MUST be off)
+## Step 1 — Privacy gate (blocking once at install/onboarding)
 
 Biotic data is confidential. Before anything else:
 
-1. **Try to detect** whether model-training / data-retention is off for the agent you are.
+1. **Check whether onboarding was already recorded.**
+   - If `~/.bait/config.json` already contains `privacy_onboarded_at`, treat the privacy
+     onboarding as already completed for this machine/setup.
+   - In that case, do **not** re-gate a reinstall/repair on a fresh confirmation; a short
+     reminder is enough.
+2. **Otherwise, try to detect** whether model-training / data-retention is off for the agent you are.
    - If you can determine it (e.g. you're running on an API/enterprise/ZDR tier where inputs
      are not used for training), confirm that to the user and continue.
    - If you **cannot** verify it programmatically, do **not** assume it's off.
-2. **If unverified or on a consumer tier**, tell the user clearly:
+3. **If unverified or on a consumer tier**, tell the user clearly:
    > "Model training has to be turned off before using BAIT."
    Then give **agent-specific** instructions for turning it off (write them for the agent you
    actually are — Claude Code, Codex, Cursor, …; point to the provider's current privacy /
    data-controls page since menus change). See
    [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md).
-3. **Gate on explicit confirmation.** Present a single choice the user must select:
+4. **Gate on explicit confirmation once.** Present a single choice the user must select:
    **"I have turned off model training."** Do not proceed until they pick it. (In Claude Code
    use a selection prompt; otherwise ask and wait for an unambiguous yes.)
+5. **Persist the onboarding result** in `~/.bait/config.json` as `privacy_onboarded_at`
+   (date) and optionally `privacy_onboarded_for` (agent name / tier) so future agents know
+   not to re-ask on every routine query.
 
-Never skip this step, even if BAIT is already partly installed.
+Never skip this step on a first install. For later maintenance runs, use the recorded marker
+instead of repeatedly asking.
 
 ---
 
@@ -71,6 +80,8 @@ Never skip this step, even if BAIT is already partly installed.
      ```json
      { "bait_path": "<chosen-path>",
        "bes_db_path": "~/IMR_biotic_BES_database/bioticexplorer.duckdb",
+       "privacy_onboarded_at": "<YYYY-MM-DD>",
+       "privacy_onboarded_for": "<agent-or-tier>",
        "skills_synced_to": ["~/.claude/skills", "~/.codex/skills"],
        "installed": "<YYYY-MM-DD>" }
      ```

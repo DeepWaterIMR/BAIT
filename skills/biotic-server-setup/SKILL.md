@@ -203,6 +203,7 @@ updateDatabase(dbPath = default_db_dir)
 
 ## After setup
 
-Verify with [`../biotic-connect/SKILL.md`](../biotic-connect/SKILL.md) and remind the user of
-the privacy pre-flight in [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md). Updates
-to BAIT itself: [`../bait-update/SKILL.md`](../bait-update/SKILL.md).
+Verify with [`../biotic-connect/SKILL.md`](../biotic-connect/SKILL.md) and, if helpful, give a
+brief privacy reminder via [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md) rather
+than re-blocking on a fresh confirmation each time. Updates to BAIT itself:
+[`../bait-update/SKILL.md`](../bait-update/SKILL.md).

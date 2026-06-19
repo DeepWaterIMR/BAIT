@@ -71,4 +71,7 @@ automatically performs a safe full rebuild if the package schema changed.
 ## Notes
 
 - Updating skills here keeps BAIT working **across all projects** without re-cloning anywhere.
-- Keep `~/.bait/config.json` accurate if paths changed.
+- Keep `~/.bait/config.json` accurate if paths changed, and preserve any
+  `privacy_onboarded_at` / `privacy_onboarded_for` fields already recorded there. If an older
+  install has no privacy onboarding marker yet, add it when the user confirms their setup
+  while you are already updating the config for another reason.
