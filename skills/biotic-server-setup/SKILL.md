@@ -172,7 +172,14 @@ Start-Process -WindowStyle Hidden -FilePath $Rscript `
 Monitor `bes_download_log.log`. A first update of a legacy database creates a metadata-only
 delivery manifest; it may refresh years changed since the database was built. If the log says
 the schema is incompatible, a full rebuild is expected and the active database remains usable
-until the validated replacement is ready.
+until the validated replacement is ready. On successful completion, `updateDatabase()` and
+`compileDatabase()` print stable start, finish, and elapsed-minute messages. Read the final
+`Update took ... minutes.` or `Compilation took ... minutes.` line from the log and report it
+to the user; the matching `finished successfully` line confirms that the duration is final.
+
+Routine updates also refresh the `csindex`, `gearindex`, `taxaindex`, and `codeindex`
+reference tables before processing changed years. Fresh cruise-series and gear mappings are
+therefore applied immediately to any annual data replaced during that run.
 
 Direct foreground use is simply:
 
