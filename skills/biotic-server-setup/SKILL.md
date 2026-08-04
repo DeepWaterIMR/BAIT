@@ -169,10 +169,15 @@ Start-Process -WindowStyle Hidden -FilePath $Rscript `
   -RedirectStandardOutput $LOG -RedirectStandardError $ERR
 ```
 
-Monitor `bes_download_log.log`. A first update of a legacy database creates a metadata-only
-delivery manifest; it may refresh years changed since the database was built. If the log says
-the schema is incompatible, a full rebuild is expected and the active database remains usable
-until the validated replacement is ready. On successful completion, `updateDatabase()` and
+Monitor `bes_download_log.log`. The first update after either a legacy database or a fresh
+`compileDatabase()` build creates the API delivery manifest. It compares API timestamps with
+the database build time, so it refreshes only data published since the build instead of
+re-downloading unchanged years. Malformed API inventory years outside the supported
+1900–current-year range are ignored automatically. A small aggregate warning about deliveries
+that disappeared between inventory and metadata lookup is safe: those deliveries are skipped
+for that run and can be checked again by the next update. If the log says the schema is
+incompatible, a full rebuild is expected and the active database remains usable until the
+validated replacement is ready. On successful completion, `updateDatabase()` and
 `compileDatabase()` print stable start, finish, and elapsed-minute messages. Read the final
 `Update took ... minutes.` or `Compilation took ... minutes.` line from the log and report it
 to the user; the matching `finished successfully` line confirms that the duration is final.
