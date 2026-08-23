@@ -28,8 +28,11 @@ backbone for almost every query.)
 `stnall` and `indall` already contain the upstream columns (cruise, position, gear,
 species…), so you rarely need manual joins.
 
-> Built by `RstoxUtils::processBioticFile()` (same logic the server uses). Join keys are
-> `missiontype, startyear, platform, missionnumber, serialnumber, catchsampleid, specimenid`.
+> Built by `RstoxUtils::processBioticFile()` (same logic the server uses). The native mission
+> key is `missiontype, startyear, platform, missionnumber`; `serialnumber` identifies a
+> fishstation within it, followed by `catchsampleid` and `specimenid` lower in the hierarchy.
+> BES also supplies the convenience field `missionid`. See
+> [`sampling-units.md`](sampling-units.md) before constructing joins or haul summaries.
 
 ## High-value columns (verified against `coreDataList` + the XSD)
 
@@ -73,6 +76,7 @@ front (inspect what's present with `DBI::dbListTables(con)`):
 | `csindex` | cruise-series code → name |
 | `gearindex` | gear code → name / category |
 | `taxaindex` | taxon (`tsn`) → name + synonyms; **primary source for species names** |
+| `codeindex` | simple coded fields; BES 0.8.5+ includes central `samplequality` and `gearcondition` lookups |
 | `metadata` | latest build/update times, package version, schema version, update mode |
 | `source_manifest` | administrative change signals used by `updateDatabase()`; not scientific data |
 

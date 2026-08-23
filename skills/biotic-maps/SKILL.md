@@ -6,6 +6,9 @@ description: Make maps of Biotic data — static maps with ggOceanMaps (basemap/
 # Make maps of Biotic data
 
 First get a tidy data frame of stations via [`../biotic-query/SKILL.md`](../biotic-query/SKILL.md).
+For quantitative catch maps, follow [`../biotic-survey-analysis/SKILL.md`](../biotic-survey-analysis/SKILL.md):
+build the station roster before species filtering, aggregate catchsample rows to the intended
+sampling unit, and retain verified zero catches.
 Map columns: `longitudestart`, `latitudestart` (decimal degrees, WGS84). Always drop `NA`
 and obviously bad coordinates first.
 

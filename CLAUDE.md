@@ -87,6 +87,7 @@ shared source of truth.
 | Install / update / maintain the **database** | [`skills/biotic-server-setup`](skills/biotic-server-setup/SKILL.md) |
 | Connect to the database from R | [`skills/biotic-connect`](skills/biotic-connect/SKILL.md) |
 | Answer a data question ("largest cod?", "all cusk on EggaN") | [`skills/biotic-query`](skills/biotic-query/SKILL.md) |
+| Analyse survey catches, stations, CPUE/density, multisamplers, or survey time series | [`skills/biotic-survey-analysis`](skills/biotic-survey-analysis/SKILL.md) |
 | Make a map (static or interactive) | [`skills/biotic-maps`](skills/biotic-maps/SKILL.md) |
 | Make a maturity ogive / growth curve / L–W plot | [`skills/biotic-lifehistory`](skills/biotic-lifehistory/SKILL.md) |
 | Build an interactive dashboard | [`skills/biotic-dashboards`](skills/biotic-dashboards/SKILL.md) |
@@ -100,12 +101,15 @@ shared source of truth.
    (`mission`, `stnall`, `indall`) and how they relate.
 3. Use [`knowledge/field-glossary.md`](knowledge/field-glossary.md) to translate
    plain-English terms into real column names. Don't guess column names.
-4. Check [`cookbook/`](cookbook/) — a recipe may already exist; adapt it.
-5. **Query within memory limits** — aggregate/filter in DuckDB and `collect()` only the small
+4. For quantitative survey work, read [`knowledge/sampling-units.md`](knowledge/sampling-units.md)
+   and [`knowledge/quality-codes.md`](knowledge/quality-codes.md) before defining haul keys,
+   filters, zeros, aggregation, or raising.
+5. Check [`cookbook/`](cookbook/) — a recipe may already exist; adapt it.
+6. **Query within memory limits** — aggregate/filter in DuckDB and `collect()` only the small
    final result; **never `collect()` a whole table**. For large/unknown results, count and
    estimate first, and warn/ask before pulling a lot into RAM. See
    [`knowledge/performance.md`](knowledge/performance.md).
-6. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
+7. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
    is usually a data-entry error. Pull the top ~10, flag implausible records for the user, and
    report the largest *plausible* one — never the raw max. See
    [`knowledge/data-quality.md`](knowledge/data-quality.md).
