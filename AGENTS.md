@@ -92,6 +92,7 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 | Make a maturity ogive / growth curve / L–W plot | `skills/biotic-lifehistory/SKILL.md` |
 | Build an interactive dashboard | `skills/biotic-dashboards/SKILL.md` |
 | Handle data safely / opt out of training | `skills/biotic-privacy/SKILL.md` |
+| Write the package-loading header of an R script / qmd / Rmd | `skills/r-package-setup/SKILL.md` |
 
 ## Before answering any data question
 
@@ -111,6 +112,13 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 7. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
    is usually a data-entry error. Pull the top ~10, flag implausible records for the user, and
    report the largest *plausible* one — never the raw max. See `knowledge/data-quality.md`.
+
+## Which version of BAIT is this?
+
+`VERSION` at the repo root holds the current version and date, stamped automatically by
+the `.githooks/pre-commit` hook (see `CONTRIBUTING.md`). Read that file
+when the user asks what version they are running, or when reporting a problem. Do not
+hand-edit the date; to raise the minor or major level, edit the version line and commit.
 
 ## Learning loop
 

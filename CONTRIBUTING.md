@@ -38,6 +38,25 @@ no real data leaked in — before committing.
 - Keep [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md) in sync — they are intentionally
   near-identical so every agent gets the same guardrails.
 
+## Versioning
+
+BAIT's version and date live in [`VERSION`](VERSION) and are stamped automatically by a
+`pre-commit` hook. **Enable it once per clone:**
+
+```bash
+git config core.hooksPath .githooks
+```
+
+- The **patch** level bumps on every commit; the date is set to the commit day.
+- Bump the **minor** or **major** level by hand in `VERSION` before committing — the hook
+  keeps a hand-set version and only refreshes the date. Use a minor bump for new skills or
+  a reorganised knowledge base, and reserve a major bump for changes that break existing
+  installs.
+- The hook also mirrors the stamp into the `<!-- version -->` line in `README.md`, unless
+  the README has unstaged edits (it will not sweep unrelated work into your commit).
+- Never edit `VERSION` in the same commit as unrelated work expecting it to survive
+  untouched — the hook always rewrites the date.
+
 ## Style
 
 - Markdown wrapped at ~95 columns.

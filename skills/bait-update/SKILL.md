@@ -58,7 +58,15 @@ default to the toolkit.
      "https://www.imr.no/formats/nmdbiotic/v3/nmdbioticv3.xsd" \
      "<bait_path>/knowledge/field-glossary.md"
    ```
-5. Tell the user what changed (`git -C "<bait_path>" log --oneline -5`).
+5. **Make sure the version hook is enabled** (older clones predate it):
+   ```bash
+   git -C "<bait_path>" config core.hooksPath .githooks
+   ```
+6. Tell the user what changed — the new version and the last few commits:
+   ```bash
+   cat "<bait_path>/VERSION"
+   git -C "<bait_path>" log --oneline -5
+   ```
 
 ## 2. Update the Biotic database (incremental)
 

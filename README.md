@@ -2,6 +2,8 @@
 
 # 🎣 BAIT — Biotic AI Toolkit
 
+<!-- version -->**Version 0.1.23** (2026-08-28)<!-- /version -->
+
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
 BAIT is a knowledge pack that turns a general coding agent (Claude Code, Codex, Cursor, Antigravity, Mistral Vibe, …) into a competent assistant for the

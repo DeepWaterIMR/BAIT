@@ -72,7 +72,11 @@ instead of repeatedly asking.
 5. **Clone only when no existing install was found:**
    ```bash
    git clone https://github.com/DeepWaterIMR/BAIT "<chosen-path>"
+   git -C "<chosen-path>" config core.hooksPath .githooks
    ```
+   The second line enables the version-stamping `pre-commit` hook, so a user who
+   contributes a recipe back gets the version bump for free. It is harmless for users who
+   never commit.
 6. **Record the install** so every future session/project can find it:
    - Write/merge `~/.bait/config.json`. On Windows, store `bes_db_path` as an explicit
      `%USERPROFILE%`-based absolute path rather than `~`, because R can expand `~` to
