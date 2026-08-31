@@ -10,14 +10,17 @@ When Word output is requested:
 
 1. If the user supplied a `.docx` or `.dotx` reference document, inspect it and use it as
    the design authority through Quarto's `reference-doc` option.
-2. If no template was supplied, ask once whether the user wants to provide an MS Word
-   template. Continue without delay if they decline or do not have one.
-3. With no user template, use Microsoft Word's generic **Manuscript** design when it is
+2. If the user explicitly requests an IMR web report, `nettrapport`, or the bundled IMR
+   design, follow [`imr-nettrapport.md`](imr-nettrapport.md). Do not apply that design to
+   unrelated reports merely because BAIT is being used.
+3. Otherwise, if no template was supplied, ask once whether the user wants to provide an
+   MS Word template. Continue without delay if they decline or do not have one.
+4. With no user template, use Microsoft Word's generic **Manuscript** design when it is
    installed. Locate `Manuscript.dotx` within the local Microsoft Word or Office
    installation. On macOS its usual path is
    `/Applications/Microsoft Word.app/Contents/Resources/QuickStyles/Manuscript.dotx`.
    Search rather than assuming a path on other platforms.
-4. Build a complete local reference document with:
+5. Build a complete local reference document with:
 
    ```sh
    python scripts/build_manuscript_reference.py \
@@ -29,12 +32,12 @@ When Word output is requested:
    directly: it lacks some Pandoc-specific styles used for tables, captions, and code.
    Treat the generated reference document as local unless its licence permits
    redistribution.
-5. If neither a user template nor the installed Manuscript design is available, use
+6. If neither a user template nor the installed Manuscript design is available, use
    Pandoc's default Word reference document and tell the user that the Manuscript design
    could not be applied. Do not claim template fidelity that was not verified.
 
 Do not copy proprietary or organisation-specific templates into a skill or repository
-unless the owner explicitly authorises redistribution. A reference document controls
+unless the owner explicitly authorises inclusion. A reference document controls
 styles, theme, page properties, and some document parts; its body is not a reusable report
 body. Exact covers, closing pages, headers, automatic numbering, or other organisation
 features may require a small project-specific postprocessor after Quarto renders. Keep such

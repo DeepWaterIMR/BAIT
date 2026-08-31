@@ -2,7 +2,7 @@
 
 # 🎣 BAIT — Biotic AI Toolkit
 
-<!-- version -->**Version 0.1.24** (2026-08-31)<!-- /version -->
+<!-- version -->**Version 0.2.0** (2026-08-31)<!-- /version -->
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
@@ -21,7 +21,8 @@ BAIT is a knowledge pack that turns a general coding agent (Claude Code, Codex, 
    [ggFishPlots](https://deepwaterimr.github.io/ggFishPlots/), and
    [BioticExplorer](https://github.com/DeepWaterIMR/BioticExplorer)/Shiny.
 5. **Build reproducible Quarto analyses and reports** in HTML, Word, and PDF, using an
-   organisation's Word template when supplied or a generic Manuscript design otherwise.
+   organisation's Word template when supplied, the bundled IMR web-report template when
+   explicitly requested, or a generic Manuscript design otherwise.
 
 > **It is not a trained model.** Your data is never sent anywhere and never enters any
 > model's weights. The agent simply *reads this repo* while it helps you. See

@@ -10,8 +10,8 @@ description: >-
 # Build reproducible Quarto outputs
 
 Treat the `.qmd` source as the authoritative executable document. Keep the workflow
-generic: project or organisation templates may be supplied by the user, but this skill
-does not assume or bundle one.
+generic: project or organisation templates may be supplied by the user. The bundled IMR
+web-report template is an opt-in alternative, not the default for unrelated work.
 
 ## Choose the output mode
 
@@ -19,6 +19,9 @@ does not assume or bundle one.
   [`references/html-analysis.md`](references/html-analysis.md).
 - For a formal Word or PDF report, read
   [`references/formal-reports.md`](references/formal-reports.md).
+- If the user explicitly requests an IMR web report, `nettrapport`, or the bundled IMR
+  Word design, also read
+  [`references/imr-nettrapport.md`](references/imr-nettrapport.md).
 - Read both references when the same source must produce both kinds of output.
 - When adding or changing package-loading code, also use
   [`../r-package-setup/SKILL.md`](../r-package-setup/SKILL.md).
