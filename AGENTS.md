@@ -92,6 +92,7 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 | Make a maturity ogive / growth curve / L–W plot | `skills/biotic-lifehistory/SKILL.md` |
 | Build an interactive dashboard | `skills/biotic-dashboards/SKILL.md` |
 | Handle data safely / opt out of training | `skills/biotic-privacy/SKILL.md` |
+| Build or revise a reproducible Quarto HTML, Word, or PDF analysis/report | `skills/quarto-reporting/SKILL.md` |
 | Write the package-loading header of an R script / qmd / Rmd | `skills/r-package-setup/SKILL.md` |
 
 ## Before answering any data question
