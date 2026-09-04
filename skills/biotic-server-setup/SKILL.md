@@ -7,10 +7,11 @@ description: Download, install, update, or maintain the IMR Biotic DuckDB databa
 
 The database is a **DuckDB** file built by
 [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer). Default
-location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). On Windows, prefer an
-explicit path under `%USERPROFILE%` such as
-`C:/Users/<user>/IMR_biotic_BES_database/bioticexplorer.duckdb`, because R may expand `~` to
-the user's Documents folder. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
+location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). On Windows the default
+is `%USERPROFILE%\IMR_biotic_BES_database\bioticexplorer.duckdb`, because R may expand `~` to
+the user's Documents folder, which OneDrive often redirects. BioticExplorerServer >= 0.8.7
+resolves this itself (`defaultDbPath()`), but keep passing an explicit path so setup behaves
+the same on older versions. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
 was installed with `bait-install`.
 
 ## 0. Pre-flight (do this before downloading)
@@ -209,9 +210,11 @@ updateDatabase(dbPath = default_db_dir)
   update, but never while an update is running.
 - **Download failed / stalled?** Read `bes_download_log.log`: a connection error usually means
   the intranet dropped (reconnect VPN/HI-Adm and re-run); disk-full means free space (>2 GB).
-- **`utils::menu()` failed in background Rscript?** The target directory was probably not
-  created at the same path that `compileDatabase()` received. On Windows especially, avoid
-  `~`, pre-create `%USERPROFILE%\IMR_biotic_BES_database\`, and pass that exact absolute path.
+- **`utils::menu()` failed in background Rscript?** Fixed in BioticExplorerServer >= 0.8.7,
+  which creates a missing database folder without prompting in non-interactive sessions. On
+  older versions the target directory was probably not created at the same path that
+  `compileDatabase()` received: pre-create `%USERPROFILE%\IMR_biotic_BES_database\` and pass
+  that exact absolute path.
 
 ## After setup
 

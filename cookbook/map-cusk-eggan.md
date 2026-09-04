@@ -25,9 +25,13 @@ coordinates, then map with `ggOceanMaps`.
 ```r
 library(tidyverse); library(DBI); library(duckdb); library(ggOceanMaps)
 
-con <- dbConnect(duckdb::duckdb(),
-                 dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
-                 read_only = TRUE)
+db_path <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+} else {
+  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+}
+
+con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 stnall  <- tbl(con, "stnall")
 csindex <- tbl(con, "csindex")   # cruise-series lookup (loaded as standard in biotic-connect)
 

@@ -26,9 +26,13 @@ lazily. Skeleton:
 ```r
 library(shiny); library(tidyverse); library(DBI); library(duckdb); library(leaflet)
 
-con <- dbConnect(duckdb::duckdb(),
-                 dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
-                 read_only = TRUE)
+db_path <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+} else {
+  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+}
+
+con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 onStop(function() dbDisconnect(con, shutdown = TRUE))   # always clean up
 stnall <- tbl(con, "stnall")
 

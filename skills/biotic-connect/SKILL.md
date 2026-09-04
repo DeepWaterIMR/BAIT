@@ -40,7 +40,8 @@ result; `DBI::dbDisconnect(con, shutdown = TRUE)` when done. Never `collect()` a
 > **Database location:** if BAIT was installed with `bait-install`, the database path is
 > recorded in `~/.bait/config.json` (`bes_db_path`) — prefer it over the default above, since
 > the user may have chosen a different location. On Windows, avoid R's `~` expansion for the
-> default path because it can point to Documents rather than the user profile directory.
+> default path because it can point to Documents rather than the user profile directory —
+> `BioticExplorerServer::findDatabase()` checks both locations if that package is installed.
 
 ## File mode (no database; a few XML files)
 

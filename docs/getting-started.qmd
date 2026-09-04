@@ -33,7 +33,8 @@ The agent takes it from there and walks you through:
 4. **Sets up the database** (asks first — it's a big download). You'll need IMR network
    access (VPN / HI-Adm Wi-Fi) and >2 GB of disk; the download runs in the background with a
    log and can take **hours**. *Don't* run it over mobile internet or Starlink. The database
-   lands at `~/IMR_biotic_BES_database/` — outside any repo, on purpose. Intranet is only
+   lands at `~/IMR_biotic_BES_database/` (`%USERPROFILE%\IMR_biotic_BES_database\` on
+   Windows) — outside any repo, on purpose. Intranet is only
    needed for downloading/updating; querying is fully offline.
 5. **Verifies the connection** and shows you an example.
 

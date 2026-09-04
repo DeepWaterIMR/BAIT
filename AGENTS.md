@@ -20,7 +20,9 @@ the user's machine.**
 1. **Never upload, paste, or transmit raw Biotic data** to any external service, API, or
    web tool. That includes pasting rows into a chat that reaches a model provider.
 2. **The database is not in this repo and must never be copied here.** It lives outside
-   the repo at `~/IMR_biotic_BES_database/bioticexplorer.duckdb`. Reference it by path.
+   the repo at `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (`%USERPROFILE%\IMR_biotic_BES_database\bioticexplorer.duckdb` on Windows,
+   because R expands `~` through the OneDrive-redirected Documents folder there).
+   Reference it by path.
 3. **Never write raw individual-level records or precise station coordinates** into any
    file that gets committed (cookbook, examples, docs, commit messages). Recipes and
    examples use *code*, not data — and rounded/synthetic values when an example value is

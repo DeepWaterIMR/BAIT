@@ -24,9 +24,13 @@ stages count as "mature" for ling before fitting. Report `$params` (L50), not ju
 ```r
 library(tidyverse); library(DBI); library(duckdb); library(ggFishPlots)
 
-con <- dbConnect(duckdb::duckdb(),
-                 dbdir = path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb"),
-                 read_only = TRUE)
+db_path <- if (.Platform$OS.type == "windows") {
+  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+} else {
+  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+}
+
+con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 indall  <- tbl(con, "indall")
 csindex <- tbl(con, "csindex")   # cruise-series lookup (loaded as standard in biotic-connect)
 
