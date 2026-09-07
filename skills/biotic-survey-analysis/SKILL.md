@@ -22,7 +22,7 @@ Use [`../biotic-query/SKILL.md`](../biotic-query/SKILL.md) for bounded extractio
 1. State the estimand and sampling unit: catchsample, fishstation (`serialnumber`), or a documented multi-bag haul (`station`).
 2. Build a stable key. In BES use `missionid + serialnumber`; for native Biotic use `missiontype + startyear + platform + missionnumber + serialnumber`.
 3. Inspect catchsample/catch-part structure and comments before summing species records.
-4. Decode `samplequality`, `gearcondition`, and `stationtype`; apply a documented survey-specific qualification rule. Do not interpret code 2 in either quality field as generically “acceptable.”
+4. Decode `samplequality`, `gearcondition`, and `stationtype`; apply a documented survey-specific qualification rule. Do not interpret code 2 in either quality field as generically “acceptable.” Exclude non-representative stations via `stationtype` — usually codes 2, C, A and E — and write the filter so `NULL` stations survive it (`is.na(stationtype) | !stationtype %in% ...`), because SQL `NOT IN` drops them.
 5. Build the qualified station roster independently of target catch, then complete verified non-catches as true zeros.
 6. Aggregate additive catch and effort to the same unit. Sum numerators and denominators before calculating rates or densities.
 7. Raise length or individual observations within catchsample using a numeric representation factor. Keep observed sample size and raised abundance separate.

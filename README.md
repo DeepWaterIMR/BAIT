@@ -2,7 +2,7 @@
 
 # 🎣 BAIT — Biotic AI Toolkit
 
-<!-- version -->**Version 0.2.2** (2026-09-04)<!-- /version -->
+<!-- version -->**Version 0.2.3** (2026-09-07)<!-- /version -->
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 

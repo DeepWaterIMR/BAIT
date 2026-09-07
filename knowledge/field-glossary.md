@@ -40,7 +40,7 @@ Maps plain-English concepts to the **column names** used in the flattened tables
 | `stationstarttime` | Start time | time |  | stnall, indall | Time (UTC) when the gear reached fishing depth. For longline or gillnet, this is the time when the first hook or net was set. |
 | `stationstopdate` | Stop date | date |  | - | Date (UTC) when the gear left fishing depth. |
 | `stationstoptime` | Stop time | time |  | - | Time (UTC) when the gear reached fishing depth. For longline or gillnet, this is the time when the last hook or net left the water. |
-| `stationtype` | Station type | KeyType | yes | - | Code for the type of station. |
+| `stationtype` | Station type | KeyType | yes | stnall | Code for the type of station, and the field that flags stations whose catch is not representative (codes 2, C, A, E are usually excluded). Its reference dataset is named `fishstationtype`, not `stationtype`. Mostly `NULL`, which means an ordinary station and must be retained. See [quality-codes.md](quality-codes.md). |
 | `latitudestart` | Lat. start | decimal |  | stnall, indall | Latitudinal position, when the gear reach the fishing depth. (decimal degrees, datum: WGS 84). |
 | `longitudestart` | Lon. start | decimal |  | stnall, indall | Longitudinal position, when the gear reach the fishing depth. (decimal degrees, datum: WGS 84). |
 | `latitudeend` | Lat. end | decimal |  | - | Latitudinal position, when the gear left the fishing depth. (decimal degrees, datum: WGS 84). |

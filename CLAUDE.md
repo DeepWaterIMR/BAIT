@@ -100,7 +100,10 @@ shared source of truth.
 ## Before answering any data question
 
 1. Read [`knowledge/connection.md`](knowledge/connection.md) — always connect read-only,
-   query lazily with `dplyr::tbl()`, and `collect()` only at the end.
+   query lazily with `dplyr::tbl()`, and `collect()` only at the end. **Filters on nullable
+   coded columns must state what missing means** (`is.na(x) | !x %in% ...`): a lazy
+   `!x %in% ...` runs as SQL `NOT IN` and silently drops every `NULL` row, so the same code
+   gives different results before and after `collect()`.
 2. Read [`knowledge/data-model.md`](knowledge/data-model.md) — the three tables
    (`mission`, `stnall`, `indall`) and how they relate.
 3. Use [`knowledge/field-glossary.md`](knowledge/field-glossary.md) to translate

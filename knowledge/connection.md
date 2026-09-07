@@ -78,6 +78,8 @@ if ("taxaindex" %in% DBI::dbListTables(con))
    colnames(indall)
    ```
    Use [`field-glossary.md`](field-glossary.md) to map plain English → column names.
+5. **Never write `!x %in% ...` on a lazy table.** It is the one predicate whose meaning
+   changes depending on whether it runs before or after `collect()` — see below.
 
 ## Lazy → collect pattern
 
@@ -86,6 +88,43 @@ result <- stnall |>
   filter(commonname == "torsk", missiontype %in% c(4, 5)) |>   # filter in DuckDB
   select(startyear, serialnumber, longitudestart, latitudestart, catchweight) |>
   collect()                                                     # pull final result only
+```
+
+## Missing values across the `collect()` boundary
+
+A filter written before `collect()` runs in **DuckDB**, under SQL three-valued logic; the same filter written after `collect()` runs in **R**. For most predicates the two agree, but for negated `%in%` they do not, and the same line of code silently returns different data depending on which side of `collect()` it sits on. Moving a `filter()` across `collect()` is therefore not a refactor — it can change the result.
+
+Filtering a column containing one `NA`, comparing DuckDB against R:
+
+| Predicate | Before `collect()` (SQL) | After `collect()` (R) | |
+|---|---|---|---|
+| `!x %in% c("a")` | `NA` row **dropped** | `NA` row **kept** | ⚠️ differs |
+| `x %in% c("a")` | dropped | dropped | same |
+| `x != "a"` | dropped | dropped | same |
+| `!(x == "a")` | dropped | dropped | same |
+| `x > 2` | dropped | dropped | same |
+| `is.na(x) \| !x %in% c("a")` | **kept** | **kept** | same |
+
+The cause: R's `%in%` returns `FALSE` for `NA`, so `!FALSE` keeps the row. SQL's `NOT IN` returns `NULL` for `NULL`, and `filter()` keeps only `TRUE`, so the row is discarded. Note that every other predicate above drops missing values on *both* sides — consistent, but frequently not what you want either.
+
+**Rule:** decide explicitly what a missing value means for the field, and say so in the filter.
+
+```r
+# WRONG on a lazy tbl - silently discards every station with a NULL stationtype
+stnall |> filter(!stationtype %in% c("2", "A", "C", "E"))
+
+# RIGHT - unflagged (NULL) stations are ordinary stations and must be kept
+stnall |> filter(is.na(stationtype) | !stationtype %in% c("2", "A", "C", "E"))
+```
+
+This matters most for the sparsely populated coded fields, where missing is the *normal* value rather than an error: `stationtype` is `NULL` for about 72% of `stnall` rows, so the naive form throws away 2.2 of 3.1 million stations. See [`quality-codes.md`](quality-codes.md).
+
+Count before and after every filter on a nullable column and reconcile the difference with what you meant to remove:
+
+```r
+before <- stnall |> count() |> collect()
+after  <- stnall |> filter(is.na(stationtype) | !stationtype %in% c("2", "A", "C", "E")) |>
+  count() |> collect()
 ```
 
 ## Two ways to get data, same shape
