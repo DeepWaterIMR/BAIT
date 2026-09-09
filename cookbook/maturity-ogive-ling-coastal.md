@@ -15,7 +15,8 @@ the Coastal survey (Kysttokt), plus the fitted L50 parameter.
 
 ## Approach
 
-Filter `indall` to `lange` on the Coastal cruise series, then fit with
+Filter `indall` to `lange` on the Coastal survey (Kysttokt, **cruise-series code 23** — not
+a `"coastal|kyst"` name grep, which also matches codes 28, 29 and 30), then fit with
 `ggFishPlots::plot_maturity()`. `maturationstage` is an NMDreference **code** — decide which
 stages count as "mature" for ling before fitting. Report `$params` (L50), not just the plot.
 
@@ -34,10 +35,11 @@ con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 indall  <- tbl(con, "indall")
 csindex <- tbl(con, "csindex")   # cruise-series lookup (loaded as standard in biotic-connect)
 
-# Coastal-survey cruise-series code(s)
-csList <- csindex |> distinct(cruiseseriescode, name) |> collect()
-selCS  <- csList[grepl("coastal|kyst", csList$name, ignore.case = TRUE), ]
-csFilt <- selCS$cruiseseriescode
+# Coastal survey (Kysttokt) = cruise-series code 23. Grepping "coastal|kyst" would also
+# pull codes 28, 29 and 30 — different surveys. See knowledge/species-and-surveys.md.
+csFilt <- "23"
+csindex |> distinct(cruiseseriescode, name) |> filter(cruiseseriescode == csFilt) |>
+  collect()   # sanity-check the name before relying on the code
 filtExp <- paste(sapply(csFilt, function(k) paste0(
   "cruiseseriescode %like% '", k, ",%' | cruiseseriescode %like% '%,", k,
   "' | cruiseseriescode %like% '%,", k, ",%' | cruiseseriescode %in% c('", k, "')")),

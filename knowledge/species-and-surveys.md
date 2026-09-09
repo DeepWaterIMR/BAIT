@@ -76,22 +76,45 @@ filtExp <- paste(sapply(csFilt, function(k) {
 stn <- stnall |> dplyr::filter(!!!rlang::parse_exprs(filtExp)) |> collect()
 ```
 
-### Cruise-series nicknames (living list — users expand it)
+### Cruise-series nicknames
 
-Surveys go by **nicknames** (EggaN, Kysttokt, …). Map a nickname to a search term for
-`csindex$name`, then use the pattern above. This list grows as the team confirms the exact
-`name` strings and codes — **add a row whenever you learn or are taught a new one**, and
-verify the search term against `csindex` before relying on it.
+Surveys go by **nicknames**, unofficial names and abbreviations (EggaN, EggaNord, EN,
+Kysttokt, …) that appear nowhere in the database — `csindex` stores only the long official
+`name`, so grepping it for a nickname returns nothing.
 
-| Survey (nickname) | `csindex$name` contains | Code | Notes |
-|---|---|---|---|
-| EggaN | "continental" slope … **"autumn"** | 16 | Norwegian Sea slope, deep-sea fish; user-confirmed |
-| EggaS | "continental" slope … **"spring"** | 25 | The other slope series |
-| Coastal survey (Kysttokt) | "coastal" / "kyst" | | Coastal cod, ling, etc. |
-| Winter survey (Vintertokt) | "winter" | | Barents Sea winter |
-| Ecosystem survey / BESS (Økosystemtokt) | "Barents Sea" + "ecosystem" + **"autumn"** | 6 | user-confirmed; see ambiguity warning below |
-| Shrimp survey (Reketokt) | "shrimp" / "reke" | | |
-| Spurdog survey (Pigghåtokt) | "spurdog" / "pigghå" | | |
+The table below is the registry: it maps every name the team uses to the authoritative
+`cruiseseriescode`. When a user names a survey, look it up here across **all** name columns,
+take the code, and filter on `cruiseseriescode` with the pattern above. It is generated from
+a spreadsheet — see [Updating the nickname registry](#updating-the-nickname-registry).
+
+<!-- BEGIN cruise-series-nicknames -->
+| Code | Nickname | Abbreviations | Other names in use | Norwegian | Notes |
+|---|---|---|---|---|---|
+| 5 | Winter Survey; Barents Sea Winter Survey | WinterS; WS; BWS |  | Vintertokt | User-confirmed. |
+| 6 | Ecosystem Survey; Barents Sea Ecosystem Survey | BESS; BES; EcoS |  | Økosystemtokt | User-confirmed. 'ES' is reserved for EggaS (code 25). 'ecosystem' alone is ambiguous - codes 8, 17, 26 and 32 also contain it. |
+| 7 | Lofoton Survey; Cod Survey; Skrei Survey; Lofoten Cod Survey | CodS |  | Skreitokt |  |
+| 9 |  | IBTS |  |  | IBTS is shared with codes 10 and 11 on purpose. This is Q1; ask which quarter is meant. |
+| 10 |  | IBTS |  |  | IBTS is shared with codes 9 and 11 on purpose. This is Q2_Q3; ask which quarter is meant. |
+| 11 |  | IBTS |  |  | IBTS is shared with codes 9 and 10 on purpose. This is Q4; ask which quarter is meant. |
+| 15 | Shrimp Survey | ShrimpS; SS |  | Reketokt | User-confirmed. Only series whose official name contains 'shrimp'. |
+| 16 | EggaNord; EggaN | EggaN; EN |  | Eggakanttokt nord; Egga-nord | Confirmed. Stored by season, not compass direction: name says 'autumn', not 'north'. |
+| 17 | Norwegian Sea Ecosystem Survey | NES; NS |  | Økosystemtokt i Norskehavet |  |
+| 18 | Mackerel Survey | MS |  | Makrelltokt |  |
+| 20 | Deep Pelagic; Deep Pelagic Survey | DeepP; DP; DeepPelagic; DPS |  | Dyppelagisk |  |
+| 23 | Coastal Survey | CoastalS; CS |  | Kysttokt | User-confirmed: this is Kysttokt; codes 28, 29 and 30 are not. Filter on the code - grepl('coastal\|kyst') matches all four. |
+| 25 | EggaSouth; EggaSør; EggaS | EggaS; ES |  | Eggakanttokt sør; Egga-sør | User-confirmed. 'ES' means this survey, not the Ecosystem survey. Name says 'spring', not 'south'. |
+| 33 | King Crab Survey | KingCS |  | Kongekrabbetokt |  |
+
+> ⚠️ **Ambiguous short forms** — these map to more than one cruise series. Ask the user
+> which one they mean; never pick the first match.
+>
+> - **IBTS** → codes 9, 10, 11
+
+> Generated from [`cruise-series-nicknames.xlsx`](cruise-series-nicknames.xlsx) on 2026-09-09 by
+> `Rscript scripts/cruise-series-nicknames.R import`. **Edit the spreadsheet, not this table.**
+> `Code` is `cruiseseriescode` and is authoritative — filter on it rather than grepping
+> `csindex$name`. The spreadsheet also lists every series that has no nickname yet.
+<!-- END cruise-series-nicknames -->
 
 > ⚠️ The Egga slope surveys are **stored by season, not compass direction**: the `name`
 > strings are *"…continental slope NOR deep-sea fish cruise in autumn"* (EggaN, code 16) and
@@ -105,6 +128,52 @@ verify the search term against `csindex` before relying on it.
 > (17), Porsangerfjorden/Tanafjorden/Kvænangen spring_autumn (26), and Global OneOcean (32).
 > Don't grep "ecosystem" alone and take the first/only hit — filter on "Barents Sea" +
 > "autumn" too, or just use code 6 directly once confirmed against `csindex`.
+
+### Surveys that are not a cruise series
+
+Not every survey is registered as a cruise series. These have **no `cruiseseriescode`** at
+all, so `csindex` cannot find them and any cruise-series filter returns an empty result
+without erroring. Address them by cruise number.
+
+<!-- BEGIN adhoc-surveys -->
+| Survey | Other names | Norwegian | Cruise numbers | Notes |
+|---|---|---|---|---|
+| Spurdog Survey |  | Pigghåtokt | `c("2021011", "2022849", "2023200019", "2024215001", "2025215001")` | User-supplied. Not registered as a cruise series - cruiseseriescode is NA on all five. All are missiontype 5 (chartered vessel, Skulebas/Skulebas Senior), 2021-2025. Add the new cruise number each year. |
+
+> These have **no `cruiseseriescode`** — `csindex` does not know them, and filtering by
+> cruise series will silently return nothing. Address them by cruise number instead:
+> `filter(cruise %in% c(...))` on `mission` / `stnall` / `indall`.
+>
+> The lists are **not self-updating** — a new survey year adds a cruise number that
+> nobody has recorded here. Check the latest year before reporting a time series as
+> complete, and ask the user to add missing cruises via the export/import routine.
+<!-- END adhoc-surveys -->
+
+### Updating the nickname registry
+
+Nicknames drift and new surveys appear, so the registry is a round trip through Excel.
+
+```bash
+# 1. Refresh the spreadsheet from the database (keeps every hand-edited column)
+Rscript scripts/cruise-series-nicknames.R export
+
+# 2. The user edits knowledge/cruise-series-nicknames.xlsx and hands it back
+
+# 3. Regenerate the table above
+Rscript scripts/cruise-series-nicknames.R import
+```
+
+Run both from the repo root. The workbook has two sheets: `cruise_series` (surveys with a
+`cruiseseriescode`) and `ad_hoc_surveys` (surveys without one, addressed by cruise number).
+`export` rewrites only the database-derived columns — code, official name, year span, cruise
+count, and an `in_database` check on every ad-hoc cruise number — and lists **every** cruise
+series, including the ones nobody has named yet. `import` replaces everything between the
+marker comments in both sections above and skips unnamed rows.
+
+The spreadsheet is **not committed** — `.gitignore` blocks `*.xlsx` as a data safety net,
+and that rule stays. The markdown table above is therefore the shared, version-controlled
+copy, and `export` rebuilds the spreadsheet from it when the file is missing. Bump `VERSION`
+and commit this file after an import.
 
 ## `missiontype` — survey vs. commercial
 

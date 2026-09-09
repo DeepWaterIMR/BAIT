@@ -57,6 +57,11 @@ year. Row count ~ hundreds depending on the time span.
 - Confirm `icesarea` exists in your build (`colnames(stnall)`); naming of ICES codes can vary
   (`27.1.a` vs `27.1`). Adjust the regex.
 - Add `missiontype %in% c(4, 5)` to restrict to research surveys.
+- This recipe covers spurdog **wherever it was caught**, which is not the same as the
+  dedicated **Spurdog Survey (Pigghåtokt)**. That survey has no `cruiseseriescode` — select
+  it by cruise number instead; the list is in
+  [`../knowledge/species-and-surveys.md`](../knowledge/species-and-surveys.md) under
+  "Surveys that are not a cruise series".
 - **Privacy:** spurdog is a sensitive/listed species in places — check before sharing
   position-level outputs externally.
 

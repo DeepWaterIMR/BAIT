@@ -74,9 +74,16 @@ indall |>
   collect()
 ```
 
-**Catch of a species on a named survey (cruise series)** — see the cruise-series filter
-in [`../../knowledge/species-and-surveys.md`](../../knowledge/species-and-surveys.md) and
-the worked recipe [`../../cookbook/map-cusk-eggan.md`](../../cookbook/map-cusk-eggan.md).
+**Catch of a species on a named survey (cruise series)** — survey nicknames and
+abbreviations (EggaN, EggaNord, EN, Kysttokt, BESS, …) exist nowhere in the database, so
+resolve the name to a `cruiseseriescode` with the nickname registry in
+[`../../knowledge/species-and-surveys.md`](../../knowledge/species-and-surveys.md), then use
+the cruise-series filter there. A few short forms are ambiguous on purpose (`IBTS` covers
+codes 9, 10 and 11 — Q1, Q2_Q3 and Q4); the registry flags them, so ask which one is meant
+rather than guessing. Some surveys — the Spurdog Survey (Pigghåtokt) among them — have **no**
+cruise-series code and must be selected by cruise number; a cruise-series filter returns
+nothing for those without erroring, so check the ad-hoc table in the same file. Worked recipe:
+[`../../cookbook/map-cusk-eggan.md`](../../cookbook/map-cusk-eggan.md).
 
 **Get tidy data, then map / plot** → [`../biotic-maps/SKILL.md`](../biotic-maps/SKILL.md),
 [`../biotic-lifehistory/SKILL.md`](../biotic-lifehistory/SKILL.md).

@@ -15,8 +15,9 @@ each station showing catch composition by species.
 
 ## Approach
 
-The Coastal survey (Kysttokt) spans multiple cruise-series codes, so first look those up in
-`csindex` using `"coastal|kyst"`. Then filter `stnall` to valid station coordinates and
+The Coastal survey (Kysttokt) is **cruise-series code 23** — filter on the code, not on a
+name grep (`"coastal|kyst"` also matches codes 28, 29 and 30, which are other surveys; see
+the nickname registry in `knowledge/species-and-surveys.md`). Then filter `stnall` to valid station coordinates and
 positive catch weights, summarise the catch by station and species, and plot the composition
 with `leaflet.minicharts::addMinicharts()`. For readability, a good default is the **latest
 available survey year**, with the **top species by total catch** shown explicitly and all
@@ -38,12 +39,12 @@ con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 stnall  <- tbl(con, "stnall")
 csindex <- tbl(con, "csindex")
 
-# 1. Coastal survey cruise-series code(s)
-csList <- csindex |>
-  distinct(cruiseseriescode, name) |>
-  collect()
-selCS  <- csList[grepl("coastal|kyst", csList$name, ignore.case = TRUE), ]
-csFilt <- selCS$cruiseseriescode
+# 1. Coastal survey (Kysttokt) = cruise-series code 23. Do NOT select it by grepping
+#    "coastal|kyst" — that also matches codes 28, 29 and 30, which are different surveys.
+#    See the nickname registry in knowledge/species-and-surveys.md.
+csFilt <- "23"
+csindex |> distinct(cruiseseriescode, name) |> filter(cruiseseriescode == csFilt) |>
+  collect()   # sanity-check the name before relying on the code
 
 filtExp <- paste(sapply(csFilt, function(k) paste0(
   "cruiseseriescode %like% '", k, ",%' | cruiseseriescode %like% '%,", k,
