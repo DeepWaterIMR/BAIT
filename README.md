@@ -2,7 +2,7 @@
 
 # 🎣 BAIT — Biotic AI Toolkit
 
-<!-- version -->**Version 0.2.7** (2026-09-09)<!-- /version -->
+<!-- version -->**Version 0.2.8** (2026-09-09)<!-- /version -->
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
@@ -74,6 +74,17 @@ Installed **once per machine**, then available in all your projects. Keep it cur
 | [`examples/`](examples/) | Runnable `.R` scripts mirroring the cookbook |
 | [`scripts/`](scripts/) | Maintenance scripts (e.g. regenerate the field glossary from the XSD) |
 | [`docs/`](docs/) | The BAIT website (Quarto → GitHub Pages) |
+
+## 🧰 Siblings
+
+BAIT is the data layer. The packs that build on it:
+
+- [**academic-writing**](https://github.com/DeepWaterIMR/academic-writing) — scientific writing style, document conventions, and the project skeleton the other packs scaffold from.
+- [**index-template**](https://github.com/DeepWaterIMR/index-template) — sdmTMB spatiotemporal survey indices, built from Biotic data through BAIT.
+- [**spict-template**](https://github.com/DeepWaterIMR/spict-template) — SPiCT biomass-dynamic stock assessments, driven by an index from index-template and a catch series.
+- [**presentation-template**](https://github.com/DeepWaterIMR/presentation-template) — Quarto RevealJS slides.
+
+Install whichever you need alongside; the skills stay out of each other's way.
 
 ## 🧠 It learns from you
 
