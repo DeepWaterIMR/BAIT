@@ -141,15 +141,22 @@ BioticExplorerServer) and the intranet check. Use `updateDatabase()`, not `compi
 - automatically calls `compileDatabase()` to build, validate, and safely swap a complete
   sibling database if the package's database schema changed.
 
-Run it as a monitored background job, as for the initial download.
+Run it as a monitored background job, as for the initial download. The job brackets the
+update with BAIT's `scripts/db-update-report.R`: a **snapshot** of the database before the
+update, and a **report** afterwards that counts what changed and flags suspicious entries in
+the new data (see "After the update" below). `BAIT` is `bait_path` from `~/.bait/config.json`.
 
 **macOS/Linux:**
 
 ```bash
 DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
+BAIT="<bait_path>"
 LOG="$DB/bes_download_log.log"
+REPORT="$BAIT/scripts/db-update-report.R"
 screen -dmS bes_update bash -lc \
-  "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 Rscript -e 'library(BioticExplorerServer); updateDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
+  "export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8; { Rscript \"$REPORT\" snapshot \"$DB/bioticexplorer.duckdb\"; \
+     Rscript -e 'library(BioticExplorerServer); updateDatabase(dbPath=\"$DB\")' && \
+     Rscript \"$REPORT\" report \"$DB/bioticexplorer.duckdb\"; } > \"$LOG\" 2>&1"
 ```
 
 **Windows (PowerShell, after resolving `$Rscript` as in Step 2):**
@@ -161,9 +168,15 @@ $DB_R = $DB -replace "\\", "/"
 $LOG = Join-Path $DB "bes_download_log.log"
 $ERR = Join-Path $DB "bes_download_err.log"
 $Script = Join-Path $env:TEMP "bes_update.R"
+$Report = (Join-Path "<bait_path>" "scripts/db-update-report.R") -replace "\\", "/"
 @"
+db_file <- file.path("$DB_R", "bioticexplorer.duckdb")
+report <- function(mode) system2(file.path(R.home("bin"), "Rscript"),
+                                 c(shQuote("$Report"), mode, shQuote(db_file)))
+if (file.exists(db_file)) report("snapshot")
 library(BioticExplorerServer)
 updateDatabase(dbPath = "$DB_R")
+report("report")
 "@ | Out-File -FilePath $Script -Encoding utf8
 Start-Process -WindowStyle Hidden -FilePath $Rscript `
   -ArgumentList $Script `
@@ -182,6 +195,38 @@ validated replacement is ready. On successful completion, `updateDatabase()` and
 `compileDatabase()` print stable start, finish, and elapsed-minute messages. Read the final
 `Update took ... minutes.` or `Compilation took ... minutes.` line from the log and report it
 to the user; the matching `finished successfully` line confirms that the duration is final.
+
+### After the update: report what changed and what looks wrong
+
+When the job has finished, read `<DB>/bait_update_report.md` (also at the end of the log) and
+tell the user, in plain words:
+
+1. **What is new.** The headline counts (new/changed/removed missions; net stations, catch rows,
+   individuals, age readings) and which surveys or mission types the new data come from (the
+   "Missions with the largest changes" and "By mission type" tables). Name surveys by cruise
+   series name where `cruiseseriescode` is set (`csindex`).
+2. **Suspicious entries.** Go through each finding in the report: what it is, how many records,
+   which survey/vessel/years, and the consequence for analyses. Use the explanation printed
+   under each heading. Separate the three kinds:
+   - **Database bugs** (byte-escaped text, duplicated catch samples or individuals): act on
+     them, following [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md):
+     repair if a repair exists, otherwise draft a BioticExplorerServer bug report.
+   - **Source-data errors** (impossible or outlying values, unit slips such as grams entered as
+     kg, missing positions, double-encoded text, new spellings of an existing species name):
+     name the records (vessel, serial number, specimen) so the user can pass them to the cruise
+     leader or the NMD data managers. Do not edit the database to "fix" them.
+   - **Notes** (checklist rows without weight or count, new taxa): explain what they mean for
+     analyses; they are not errors.
+3. If the report says **"No snapshot found"**, the checks ran on the whole database and changes
+   could not be counted; say so. The snapshot is taken automatically at the start of the next
+   update.
+
+The snapshot and report contain station-level details: keep them local (see `biotic-privacy`).
+To run the report by hand (e.g. after a first download, without a snapshot):
+
+```bash
+Rscript "<bait_path>/scripts/db-update-report.R" report "$DB/bioticexplorer.duckdb"
+```
 
 Routine updates also refresh the `csindex`, `gearindex`, `taxaindex`, and `codeindex`
 reference tables before processing changed years. Fresh cruise-series and gear mappings are

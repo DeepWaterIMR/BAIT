@@ -75,6 +75,9 @@ Requires the **IMR intranet** (VPN / HI-Adm). Hand off to
 it **first checks that BioticExplorerServer itself is up to date on GitHub** (Step 1), then
 runs `updateDatabase()`. That function downloads only changed years in normal operation and
 automatically performs a safe full rebuild if the package schema changed.
+The update job snapshots the database first and writes `bait_update_report.md` afterwards;
+summarise it for the user (new entries and suspicious entries), as described under "After the
+update" in that skill.
 
 ## Notes
 

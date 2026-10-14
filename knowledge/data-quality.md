@@ -112,6 +112,20 @@ never the raw max.
 - Performance (why we still reduce in DuckDB): `../knowledge/performance.md`
 - Glossary (units): `../knowledge/field-glossary.md`
 
+## Checks after each database update
+
+`scripts/db-update-report.R` (run automatically by the update job in
+[`../skills/biotic-server-setup/SKILL.md`](../skills/biotic-server-setup/SKILL.md)) compares the
+database with a snapshot taken before the update and checks the new and changed missions for:
+text-encoding problems, catch rows without an AphiaID, new spellings of existing species names,
+missing or impossible positions, station dates outside the mission year, negative or
+species-unusual catch weights, impossible lengths/weights/ages (grouped by species, so unit
+slips such as grams entered as kg show up as one line), length-weight outliers relative to the
+species' median Fulton's K, duplicated catch samples or individuals, and removed data. Known
+source-data issues found when the script was written (2026-10): king crab individual weights
+1994–2016 stored in grams; brisling lengths of -99.99 (missing-value code) 1926–2015; a few
+2026 Coast Guard cod/saithe/haddock weights in grams.
+
 ## Text-encoding corruption
 
 Databases compiled or updated with BioticExplorerServer <= 0.8.8 under a non-UTF-8 locale store
