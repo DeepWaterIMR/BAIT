@@ -43,6 +43,19 @@ result; `DBI::dbDisconnect(con, shutdown = TRUE)` when done. Never `collect()` a
 > default path because it can point to Documents rather than the user profile directory —
 > `BioticExplorerServer::findDatabase()` checks both locations if that package is installed.
 
+## Integrity check (once per session, after connecting)
+
+```r
+n_escaped <- DBI::dbGetQuery(con, "
+  SELECT count(*) AS n FROM stnall
+  WHERE regexp_matches(commonname, '<[89a-f][0-9a-f]>')")$n
+```
+
+`n_escaped > 0` → the database has text-encoding corruption (`bl<c3><a5>kveite` instead of
+`blåkveite`), and species/platform filters will silently miss years. Stop and follow
+[`../../knowledge/data-quality.md`](../../knowledge/data-quality.md#text-encoding-corruption):
+tell the user, offer the repair, and draft a bug report if the repair is not possible.
+
 ## File mode (no database; a few XML files)
 
 ```r

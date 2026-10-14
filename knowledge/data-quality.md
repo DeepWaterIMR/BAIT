@@ -111,3 +111,54 @@ never the raw max.
 - Recipe: `../cookbook/largest-cod.md`
 - Performance (why we still reduce in DuckDB): `../knowledge/performance.md`
 - Glossary (units): `../knowledge/field-glossary.md`
+
+## Text-encoding corruption
+
+Databases compiled or updated with BioticExplorerServer <= 0.8.8 under a non-UTF-8 locale store
+Norwegian characters as literal escape text: `blåkveite` → `bl<c3><a5>kveite`, `Sjøfareren` →
+`Sj<c3><b8>fareren`. Every free-text column is affected (`commonname`, `platformname`,
+`missiontypename`, `purpose` and all comment fields), but only for the years written by the
+faulty run, typically the most recent ones after an incremental update. The result is two
+spellings of the same name, so `filter(commonname == "blåkveite")` silently loses those years.
+The usual cause is a background `Rscript` (screen, cron, an agent's shell) started with `LANG`
+unset.
+
+**Detect** (read-only, cheap; `biotic-connect` runs this after connecting):
+
+```r
+DBI::dbGetQuery(con, "
+  SELECT 'stnall' AS tab, count(*) AS n FROM stnall
+   WHERE regexp_matches(commonname, '<[89a-f][0-9a-f]>')
+  UNION ALL
+  SELECT 'mission', count(*) FROM mission
+   WHERE regexp_matches(platformname, '<[89a-f][0-9a-f]>')")
+```
+
+Any `n > 0` means the database is affected. Tell the user before answering species or platform
+questions from it: name the affected years (`count(startyear)` on the same filter) and the
+likely consequence for their query.
+
+**Act** — this is a database problem, never something to patch in the query:
+
+1. **Repair (preferred, minutes).** Close every connection to the database (R sessions,
+   BioticExplorer), make sure BioticExplorerServer is >= 0.8.9
+   (`remotes::install_github("DeepWaterIMR/BioticExplorerServer")`), then in a **fresh** R
+   session:
+
+   ```r
+   BioticExplorerServer::repairDatabaseEncoding(dryRun = TRUE)  # what would change
+   BioticExplorerServer::repairDatabaseEncoding()               # repair in place + re-index
+   ```
+
+   Re-run the detection query; it must return 0. The repair asks no questions, but it writes to
+   the user's database, so confirm with the user first.
+2. **Rebuild (fallback, hours).** If the repair errors, leaves escaped text behind, or other
+   corruption is suspected: `compileDatabase(overwrite = TRUE)` as a monitored background job
+   (see [`../skills/biotic-server-setup/SKILL.md`](../skills/biotic-server-setup/SKILL.md)).
+3. **Report.** If a database built with BioticExplorerServer >= 0.8.9 shows this corruption, or
+   the repair fails, that is a new bug. Draft an issue for
+   <https://github.com/DeepWaterIMR/BioticExplorerServer/issues> with the BES version
+   (`packageVersion("BioticExplorerServer")`), the `metadata` table, `Sys.getlocale()`, the
+   detection-query output, and one example `hex(commonname)`. Show it to the user and let them
+   submit it (no data rows beyond the example names: see `biotic-privacy`).
+

@@ -81,7 +81,7 @@ to the database as `bes_download_log.log`.
 DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
 LOG="$DB/bes_download_log.log"
 screen -dmS bes_download bash -lc \
-  "Rscript -e 'library(BioticExplorerServer); compileDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
+  "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 Rscript -e 'library(BioticExplorerServer); compileDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
 ```
 
 **Windows (PowerShell, background process):**
@@ -149,7 +149,7 @@ Run it as a monitored background job, as for the initial download.
 DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
 LOG="$DB/bes_download_log.log"
 screen -dmS bes_update bash -lc \
-  "Rscript -e 'library(BioticExplorerServer); updateDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
+  "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 Rscript -e 'library(BioticExplorerServer); updateDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
 ```
 
 **Windows (PowerShell, after resolving `$Rscript` as in Step 2):**
@@ -215,6 +215,13 @@ updateDatabase(dbPath = default_db_dir)
   older versions the target directory was probably not created at the same path that
   `compileDatabase()` received: pre-create `%USERPROFILE%\IMR_biotic_BES_database\` and pass
   that exact absolute path.
+- **Text shows `<c3><a5>` instead of `å`?** (e.g. `bl<c3><a5>kveite`.) Years written by
+  BioticExplorerServer <= 0.8.8 under a non-UTF-8 locale. Fixed in >= 0.8.9, which also forces a
+  UTF-8 locale during compile/update and warns after an update if escaped text remains. Repair
+  in place with `BioticExplorerServer::repairDatabaseEncoding()` (`dryRun = TRUE` only checks),
+  or rebuild with `compileDatabase(overwrite = TRUE)`. Detection query, decision steps and the
+  bug-report template:
+  [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md#text-encoding-corruption).
 
 ## After setup
 

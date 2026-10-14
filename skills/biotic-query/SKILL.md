@@ -93,6 +93,16 @@ nothing for those without erroring, so check the ad-hoc table in the same file. 
 - A column may not exist in every build — check `colnames()` first.
 - Coordinates: drop `NA` and bad values (`latitudestart > 0`) before mapping.
 - Empty-catch stations can have `commonname = NA`.
+- **Write species filters with `commonname`, verify them with `aphia`.** Human-readable code
+  should filter on the Norwegian `commonname` (`filter(commonname == "blåkveite")`). But
+  `commonname` is free text copied from each delivery, so before trusting the result check
+  that the name catches every record of the species: count rows per year for the species'
+  `aphia` (e.g. blåkveite = `"127144"`) and compare with the `commonname` filter. Years present
+  under `aphia` but missing under `commonname` mean a spelling change or corrupted text. List
+  the spellings with `filter(aphia == "127144") |> count(commonname)`. Text such as
+  `bl<c3><a5>kveite` is encoding corruption, not a spelling variant: follow
+  [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md#text-encoding-corruption)
+  rather than working around it in the query.
 - `stnall` can contain several catchsample rows per fishstation. Do not count rows as hauls or
   sum catch parts until their relationship is known.
 - Some operations aren't supported lazily in DuckDB — if a verb errors, reduce/aggregate as
