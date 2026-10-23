@@ -161,7 +161,13 @@ instead of repeatedly asking.
            Move-Item $target "$backup/$agentName-$name"
          }
          New-Item -ItemType Directory -Force $destination | Out-Null
-         New-Item -ItemType SymbolicLink -Path $target -Target $sourcePath | Out-Null
+         try {
+           New-Item -ItemType SymbolicLink -Path $target -Target $sourcePath -ErrorAction Stop | Out-Null
+         } catch {
+           # Ordinary Windows accounts may not have symbolic-link privileges.
+           Copy-Item -LiteralPath $source.FullName -Destination $target -Recurse -Force -ErrorAction Stop
+         }
+         if (-not (Test-Path "$target/SKILL.md")) { throw "Skill installation failed: $target" }
        }
        if ($legacySameLink) {
          New-Item -ItemType Directory -Force $backup | Out-Null
@@ -244,3 +250,6 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 Summarise for the user: where BAIT is, that skills are installed globally, where the database
 is, and that **updates** are handled by [`../bait-update/SKILL.md`](../bait-update/SKILL.md)
 (`git pull` + re-sync skills; and incremental database refresh via biotic-server-setup).
+
+On Windows without symbolic-link privileges, keep per-skill copies and refresh them on updates.
+Keep an existing `~/.codex/knowledge` link as a compatibility alias when using `~/.agents/knowledge`.

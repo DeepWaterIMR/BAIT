@@ -85,7 +85,13 @@ default to the toolkit.
            Move-Item $target "$backup/$agentName-$name"
          }
          New-Item -ItemType Directory -Force $destination | Out-Null
-         New-Item -ItemType SymbolicLink -Path $target -Target $sourcePath | Out-Null
+         try {
+           New-Item -ItemType SymbolicLink -Path $target -Target $sourcePath -ErrorAction Stop | Out-Null
+         } catch {
+           # Ordinary Windows accounts may not have symbolic-link privileges.
+           Copy-Item -LiteralPath $source.FullName -Destination $target -Recurse -Force -ErrorAction Stop
+         }
+         if (-not (Test-Path "$target/SKILL.md")) { throw "Skill installation failed: $target" }
        }
        if ($legacySameLink) {
          New-Item -ItemType Directory -Force $backup | Out-Null
@@ -154,3 +160,6 @@ update" in that skill.
   `privacy_onboarded_at` / `privacy_onboarded_for` fields already recorded there. If an older
   install has no privacy onboarding marker yet, add it when the user confirms their setup
   while you are already updating the config for another reason.
+
+On Windows without symbolic-link privileges, keep per-skill copies and refresh them on updates.
+Keep an existing `~/.codex/knowledge` link as a compatibility alias when using `~/.agents/knowledge`.
