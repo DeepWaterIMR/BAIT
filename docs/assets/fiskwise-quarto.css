@@ -6,6 +6,7 @@ body { background: var(--fiskwise-bg); color: var(--fiskwise-ink); font-family: 
 .navbar .navbar-toggler { color: var(--fiskwise-navy); }
 .navbar .navbar-toggler-icon { filter: brightness(0.25); }
 .navbar-logo { max-height: 40px; }
+.navbar #quarto-search svg { color: var(--fiskwise-navy); fill: currentColor; }
 a { color: var(--fiskwise-teal); }
 a:hover { color: var(--fiskwise-navy); }
 a:focus-visible, button:focus-visible { outline: 3px solid #B66B15; outline-offset: 4px; }
