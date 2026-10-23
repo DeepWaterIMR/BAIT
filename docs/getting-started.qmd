@@ -50,6 +50,13 @@ Say *"update BAIT"* — the agent runs `git pull`, re-syncs the global skills, a
 the database with `updateDatabase()` (changed years only in normal operation; intranet
 required). If the database schema changed, BioticExplorerServer safely performs a full rebuild.
 
+If you use Fiskwise's managed lifecycle, use its `fiskwise-install` and `fiskwise-update`
+skills instead of repeating the pack-level clone and skill-registration steps. Managed
+dependency checks honor saved R-install consent and project `renv.lock`; database refresh
+remains a separate opt-in choice. BAIT also remains usable on its own. Shared scientific
+writing, package-loading, and generic Quarto-reporting skills come from wise-writing and are
+installed on demand when needed.
+
 ## How it learns
 
 When you ask something new, the agent offers to save the solution as a **cookbook recipe**.

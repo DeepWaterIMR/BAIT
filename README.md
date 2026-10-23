@@ -2,7 +2,7 @@
 
 # 🎣 BAIT — Biotic AI Toolkit
 
-<!-- version -->**Version 0.2.14** (2026-10-23)<!-- /version -->
+<!-- version -->**Version 0.2.16** (2026-10-23)<!-- /version -->
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
@@ -57,6 +57,15 @@ Some Biotic data are confidential, and some are sensitive. BAIT is built so the 
 
 Installed **once per machine**, then available in all your projects. Keep it current with
 *"update BAIT"* ([`bait-update`](skills/bait-update/SKILL.md)).
+
+If you use Fiskwise's managed pack lifecycle, follow its `fiskwise-install`, `fiskwise-update`,
+and `fiskwise-uninstall` skills instead of repeating clone and skill-registration steps. BAIT
+remains usable as a standalone pack. Shared scientific writing and generic Quarto/package
+loading guidance comes from wise-writing and is installed on demand. The Biotic database is
+separate user data: an existing database is adopted, a new one is recorded as BAIT-created only
+after an approved successful compile, and refresh/removal are separate opt-in actions.
+Use `fiskwise-workflow` for requests spanning packs. For managed R tasks, always use
+**`r-code-style`**.
 
 > **Manual / advanced:** you can still `git clone https://github.com/DeepWaterIMR/BAIT`
 > yourself and open your agent in the folder — it reads [`CLAUDE.md`](CLAUDE.md) /
