@@ -26,39 +26,70 @@ default to the toolkit.
      ```bash
      bait_path="<bait_path>"
      legacy="$HOME/.codex/skills"
-     backup=""
+     backup_root="$HOME/.agents/skill-backups/$(date +%Y%m%d-%H%M%S)"
+     resolve_path() { python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$1"; }
      for source in "$bait_path"/skills/*; do
        [ -d "$source" ] || continue
        name=${source##*/}
-       if [ -d "$legacy/$name" ]; then
-         [ -n "$backup" ] || backup=$(mktemp -d "$HOME/.codex/skills-backup.XXXXXX")
-         diff -qr "$legacy/$name" "$source" || \
-           echo "Legacy $name differed; its full copy will be preserved in $backup."
+       source_path=$(resolve_path "$source")
+       legacy_backup=0
+       if [ -L "$legacy/$name" ] && [ "$(resolve_path "$legacy/$name")" = "$source_path" ]; then
+         legacy_backup=1 # Archive the duplicate only after the canonical link is verified.
+       elif [ -e "$legacy/$name" ] || [ -L "$legacy/$name" ]; then
+         diff -qr "$legacy/$name" "$source" || echo "Legacy $name differs; preserve it in $backup_root."
+         legacy_backup=1
        fi
        for destination in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
-         mkdir -p "$destination/$name"
-         rsync -a --delete "$source/" "$destination/$name/"
+         target="$destination/$name"
+         if [ -L "$target" ] && [ "$(resolve_path "$target")" = "$source_path" ]; then
+           continue
+         fi
+         if [ -e "$target" ] || [ -L "$target" ]; then
+           mkdir -p "$backup_root"
+           mv "$target" "$backup_root/$(basename "$(dirname "$destination")")-$name"
+         fi
+         mkdir -p "$destination"
+         ln -s "$source_path" "$target"
        done
-       if [ -d "$legacy/$name" ]; then mv "$legacy/$name" "$backup/"; fi
+       if [ "$legacy_backup" = 1 ]; then
+         mkdir -p "$backup_root"
+         mv "$legacy/$name" "$backup_root/codex-$name"
+       fi
      done
      ```
    - Windows (PowerShell):
      ```powershell
      $legacy = "$HOME/.codex/skills"
-     $backup = "$HOME/.codex/skills-backup-$(Get-Date -Format yyyyMMdd-HHmmss)"
+     $backup = "$HOME/.agents/skill-backups/$(Get-Date -Format yyyyMMdd-HHmmss)"
      foreach ($source in Get-ChildItem "<bait_path>/skills" -Directory) {
        $name = $source.Name
-       if (Test-Path "$legacy/$name") {
+       $sourcePath = [IO.Path]::GetFullPath($source.FullName)
+       $legacyItem = Get-Item -Force "$legacy/$name" -ErrorAction SilentlyContinue
+       $legacySameLink = $false
+       if ($legacyItem -and $legacyItem.LinkType -eq "SymbolicLink" -and $legacyItem.Target -eq $sourcePath) {
+         $legacySameLink = $true
+       }
+       if ($legacyItem -and -not $legacySameLink) {
          New-Item -ItemType Directory -Force $backup | Out-Null
          Move-Item "$legacy/$name" "$backup/$name"
-         if ((Get-ChildItem "$backup/$name" -Recurse | Measure-Object).Count -gt 0) {
-           Compare-Object (Get-Content "$backup/$name/SKILL.md") (Get-Content "$($source.FullName)/SKILL.md") |
-             Out-File "$backup/$name-differences.txt"
-         }
+         Compare-Object (Get-Content "$backup/$name/SKILL.md") (Get-Content "$($source.FullName)/SKILL.md") |
+           Out-File "$backup/$name-differences.txt"
        }
        foreach ($destination in @("$HOME/.claude/skills", "$HOME/.agents/skills")) {
-         New-Item -ItemType Directory -Force "$destination/$name" | Out-Null
-         robocopy $source.FullName "$destination/$name" /E /PURGE | Out-Null
+         $target = "$destination/$name"
+         $targetItem = Get-Item -Force $target -ErrorAction SilentlyContinue
+         if ($targetItem -and $targetItem.LinkType -eq "SymbolicLink" -and $targetItem.Target -eq $sourcePath) { continue }
+         if ($targetItem) {
+           New-Item -ItemType Directory -Force $backup | Out-Null
+           $agentName = Split-Path (Split-Path $destination -Parent) -Leaf
+           Move-Item $target "$backup/$agentName-$name"
+         }
+         New-Item -ItemType Directory -Force $destination | Out-Null
+         New-Item -ItemType SymbolicLink -Path $target -Target $sourcePath | Out-Null
+       }
+       if ($legacySameLink) {
+         New-Item -ItemType Directory -Force $backup | Out-Null
+         Move-Item "$legacy/$name" "$backup/codex-$name"
        }
      }
      ```
@@ -68,6 +99,11 @@ default to the toolkit.
    - This replaces BAIT-managed skill folders only; it does not touch unrelated skills.
      The legacy migration backs up and moves only matching BAIT skill folders; compare any
      reported differences with the saved copy and reconcile wanted edits into BAIT's source.
+   - Leave a canonical destination that is already a valid symlink to the exact source folder
+     in place; pulling BAIT updates it automatically. Never copy or sync a source onto its own
+     symlink. Back up differing folders or links before replacing them. Once the canonical
+     Codex link is confirmed, archive any matching legacy `.codex` symlink itself with `mv`;
+     this does not follow or remove its source.
    - **Knowledge needs no re-copy if it's a symlink.** The applicable agent-level
      `knowledge/` directory should point to `<bait_path>/knowledge`, so `git pull` refreshes
      it automatically. Verify the links:
