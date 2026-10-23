@@ -86,28 +86,58 @@ instead of repeatedly asking.
        "bes_db_path": "~/IMR_biotic_BES_database/bioticexplorer.duckdb",
        "privacy_onboarded_at": "<YYYY-MM-DD>",
        "privacy_onboarded_for": "<agent-or-tier>",
-       "skills_synced_to": ["~/.claude/skills", "~/.codex/skills"],
+       "skills_synced_to": ["~/.claude/skills", "~/.agents/skills"],
        "installed": "<YYYY-MM-DD>" }
      ```
    - **Save to your own long-term memory** that BAIT lives at `<chosen-path>` and what it's
      for, so you recall it across projects. (For Claude Code, note it in user-level memory.)
-7. **Make BAIT work across projects — install the skills globally.** Copy the skill folders
-   into the user-level directories supported by installed agents:
+7. **Make BAIT work across projects — install the skills globally.** Sync each BAIT-owned
+   skill folder separately. `rsync --delete` must target a named BAIT skill directory, never
+   the full user skills directory. On first migration, back up and reconcile matching legacy
+   Codex folders so duplicate skills do not remain active:
    - macOS/Linux:
      ```bash
-     mkdir -p ~/.claude/skills ~/.codex/skills
-     cp -R "<bait_path>/skills/." ~/.claude/skills/
-     cp -R "<bait_path>/skills/." ~/.codex/skills/
+     bait_path="<bait_path>"
+     legacy="$HOME/.codex/skills"
+     backup=""
+     for source in "$bait_path"/skills/*; do
+       [ -d "$source" ] || continue
+       name=${source##*/}
+       if [ -d "$legacy/$name" ]; then
+         [ -n "$backup" ] || backup=$(mktemp -d "$HOME/.codex/skills-backup.XXXXXX")
+         diff -qr "$legacy/$name" "$source" || \
+           echo "Legacy $name differed; its full copy will be preserved in $backup."
+       fi
+       for destination in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+         mkdir -p "$destination/$name"
+         rsync -a --delete "$source/" "$destination/$name/"
+       done
+       if [ -d "$legacy/$name" ]; then mv "$legacy/$name" "$backup/"; fi
+     done
      ```
    - Windows (PowerShell):
      ```powershell
-     New-Item -ItemType Directory -Force "$HOME/.claude/skills", "$HOME/.codex/skills" | Out-Null
-     Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.claude/skills/"
-     Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.codex/skills/"
+     $legacy = "$HOME/.codex/skills"
+     $backup = "$HOME/.codex/skills-backup-$(Get-Date -Format yyyyMMdd-HHmmss)"
+     foreach ($source in Get-ChildItem "<bait_path>/skills" -Directory) {
+       $name = $source.Name
+       if (Test-Path "$legacy/$name") {
+         New-Item -ItemType Directory -Force $backup | Out-Null
+         Move-Item "$legacy/$name" "$backup/$name"
+         Compare-Object (Get-Content "$backup/$name/SKILL.md") (Get-Content "$($source.FullName)/SKILL.md") |
+           Out-File "$backup/$name-differences.txt"
+       }
+       foreach ($destination in @("$HOME/.claude/skills", "$HOME/.agents/skills")) {
+         New-Item -ItemType Directory -Force "$destination/$name" | Out-Null
+         robocopy $source.FullName "$destination/$name" /E /PURGE | Out-Null
+       }
+     }
      ```
-   - Claude Code uses `~/.claude/skills/`; Codex uses `~/.codex/skills/`. Sync only locations
-     supported by installed agents. For other agents, point project/agent instructions at
-     `<bait_path>` and rely on the saved config.
+   - Claude Code uses `~/.claude/skills/`; Codex uses `~/.agents/skills/`. The legacy migration
+     backs up and moves only same-named BAIT skill folders from `~/.codex/skills/`; it leaves
+     unrelated folders there untouched. Compare any reported differences with the saved copy
+     and reconcile wanted edits into BAIT's source before the next sync. For other agents,
+     point project/agent instructions at `<bait_path>` and rely on the saved config.
 8. **Link the shared `knowledge/` so global skills can read it.** Skills reference
    `../../knowledge/`, resolving to the agent-level `knowledge/` directory.
    **Symlink** that to the repo's `knowledge/` so it stays current with every `git pull` — no
@@ -115,18 +145,18 @@ instead of repeatedly asking.
    - macOS/Linux:
      ```bash
      ln -sfn "<bait_path>/knowledge" ~/.claude/knowledge
-     ln -sfn "<bait_path>/knowledge" ~/.codex/knowledge
+     ln -sfn "<bait_path>/knowledge" ~/.agents/knowledge
      ```
    - Windows (PowerShell, Developer Mode or admin):
      ```powershell
      New-Item -ItemType SymbolicLink -Force -Path "$HOME/.claude/knowledge" -Target "<bait_path>/knowledge"
-     New-Item -ItemType SymbolicLink -Force -Path "$HOME/.codex/knowledge" -Target "<bait_path>/knowledge"
+     New-Item -ItemType SymbolicLink -Force -Path "$HOME/.agents/knowledge" -Target "<bait_path>/knowledge"
      ```
      If symlinks aren't permitted, copy instead — but then it must be **re-copied on every
      update** (it won't track `git pull`): copy it to the applicable agent-level
      `knowledge/` directory.
-   - Remove stale `skills/knowledge` directories left by older installs; shared knowledge
-     belongs beside `skills/`, not inside it.
+   - If a legacy `skills/knowledge` directory exists, verify it is BAIT's misplaced copy
+     before removing it; shared knowledge belongs beside `skills/`, not inside it.
 
 After this, the keyword **"biotic"** (and tasks like maps/maturity ogives on Biotic data)
 should make you reach for the `biotic-*` skills automatically, in any project.

@@ -1,0 +1,11 @@
+:root {
+  --fiskwise-navy: #123047;
+  --fiskwise-teal: #087F8C;
+  --fiskwise-bg: #F7FAFC;
+  --fiskwise-ink: #183547;
+  --fiskwise-muted: #506775;
+  --fiskwise-border: #D7E2E8;
+  --fiskwise-white: #FFFFFF;
+  --fiskwise-font: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --fiskwise-radius: 12px;
+}

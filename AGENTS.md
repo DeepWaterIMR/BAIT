@@ -50,12 +50,18 @@ A vendor-neutral knowledge pack — **not** a trained model. Nothing about the u
 enters a model's weights. You learn the database by *reading this repo at runtime*. The
 repo is the memory; it grows as users contribute recipes (see "Learning loop" below).
 
+BAIT is part of the [Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise/), alongside
+[index-wise](https://github.com/DeepWaterIMR/index-wise), [wise-writing](https://github.com/DeepWaterIMR/wise-writing),
+[spict-wise](https://github.com/DeepWaterIMR/spict-wise), and
+[wise-presentations](https://github.com/DeepWaterIMR/wise-presentations). Use each project's
+own skills and routing guidance for its workflow.
+
 ## Working across projects (important)
 
 BAIT is meant to be installed **once per machine** and used in **every** project — not cloned
 into each repo. When set up via `bait-install`, BAIT's location is saved to
 `~/.bait/config.json` and, where supported, skills are copied to the agent's user-level skills
-folder (`~/.codex/skills/` for Codex; `~/.claude/skills/` for Claude Code). Other agents can
+folder (`~/.agents/skills/` for Codex; `~/.claude/skills/` for Claude Code). Other agents can
 read skills from the saved `bait_path` through project/agent instructions.
 
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or

@@ -1,8 +1,8 @@
-<!-- badges / logo go here once available -->
+[![Part of the Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise/assets/part-of-fiskwise.svg)](https://deepwaterimr.github.io/fiskwise/)
 
 # 🎣 BAIT — Biotic AI Toolkit
 
-<!-- version -->**Version 0.2.10** (2026-10-14)<!-- /version -->
+<!-- version -->**Version 0.2.11** (2026-10-23)<!-- /version -->
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
@@ -79,10 +79,10 @@ Installed **once per machine**, then available in all your projects. Keep it cur
 
 BAIT is the data layer. The packs that build on it:
 
-- [**academic-writing**](https://github.com/DeepWaterIMR/academic-writing) — scientific writing style, document conventions, and the project skeleton the other packs scaffold from.
-- [**index-template**](https://github.com/DeepWaterIMR/index-template) — sdmTMB spatiotemporal survey indices, built from Biotic data through BAIT.
-- [**spict-template**](https://github.com/DeepWaterIMR/spict-template) — SPiCT biomass-dynamic stock assessments, driven by an index from index-template and a catch series.
-- [**presentation-template**](https://github.com/DeepWaterIMR/presentation-template) — Quarto RevealJS slides.
+- [**wise-writing**](https://github.com/DeepWaterIMR/wise-writing) — scientific writing style, document conventions, and the project skeleton the other packs scaffold from.
+- [**index-wise**](https://github.com/DeepWaterIMR/index-wise) — sdmTMB spatiotemporal survey indices, built from Biotic data through BAIT.
+- [**spict-wise**](https://github.com/DeepWaterIMR/spict-wise) — SPiCT biomass-dynamic stock assessments, driven by an index from index-wise and a catch series.
+- [**wise-presentations**](https://github.com/DeepWaterIMR/wise-presentations) — Quarto RevealJS slides.
 
 Install whichever you need alongside; the skills stay out of each other's way.
 

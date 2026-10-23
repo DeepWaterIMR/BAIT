@@ -1,0 +1,12 @@
+/* Quarto adapter. Shared palette and typography come from fiskwise-tokens.css. */
+body { background: var(--fiskwise-bg); color: var(--fiskwise-ink); font-family: var(--fiskwise-font); }
+.navbar { background: var(--fiskwise-bg) !important; border-bottom: 1px solid var(--fiskwise-border); }
+.navbar a, .navbar .navbar-title, .navbar .nav-link { color: var(--fiskwise-navy) !important; }
+.navbar .nav-link.active { color: var(--fiskwise-teal) !important; }
+.navbar .navbar-toggler { color: var(--fiskwise-navy); }
+.navbar .navbar-toggler-icon { filter: brightness(0.25); }
+.navbar-logo { max-height: 40px; }
+a { color: var(--fiskwise-teal); }
+a:hover { color: var(--fiskwise-navy); }
+a:focus-visible, button:focus-visible { outline: 3px solid #B66B15; outline-offset: 4px; }
+.nav-footer { background: white; border-top: 1px solid var(--fiskwise-border); }

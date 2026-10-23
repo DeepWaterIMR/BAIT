@@ -7,11 +7,15 @@ website:
   description: "Teach your AI agent to work with IMR Biotic data — safely, on your machine."
   site-url: "https://deepwaterimr.github.io/BAIT/"
   repo-url: "https://github.com/DeepWaterIMR/BAIT"
+  favicon: assets/fiskwise-favicon.svg
   navbar:
+    logo: assets/fiskwise-wordmark.svg
     background: primary
     left:
+      - href: https://deepwaterimr.github.io/fiskwise/
+        text: Fiskwise
       - href: index.qmd
-        text: Home
+        text: BAIT docs
       - href: getting-started.qmd
         text: Getting started
       - href: examples.qmd
@@ -22,11 +26,14 @@ website:
       - icon: github
         href: https://github.com/DeepWaterIMR/BAIT
   page-footer:
-    center: "BAIT · DeepWaterIMR · Institute of Marine Research"
+    center: "[Part of Fiskwise](https://deepwaterimr.github.io/fiskwise/) · BAIT · DeepWaterIMR"
 
 format:
   html:
     theme: cosmo
+    css:
+      - assets/fiskwise-tokens.css
+      - assets/fiskwise-quarto.css
     toc: true
     code-copy: true
     code-overflow: wrap

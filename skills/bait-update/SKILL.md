@@ -19,38 +19,70 @@ default to the toolkit.
    ```
    - If the user has **local changes** (e.g. their own draft recipes), don't clobber them —
      `git -C "<bait_path>" status` first; stash or commit, or pull on a clean tree.
-3. **Re-sync skills to supported global folders** (overwrite with the updated versions):
+3. **Re-sync BAIT-managed skill folders** to supported global folders. Scope deletion to each
+   named skill directory. Back up and move matching legacy Codex folders so old duplicates do
+   not stay active:
    - macOS/Linux:
      ```bash
-     mkdir -p ~/.claude/skills ~/.codex/skills
-     cp -R "<bait_path>/skills/." ~/.claude/skills/
-     cp -R "<bait_path>/skills/." ~/.codex/skills/
+     bait_path="<bait_path>"
+     legacy="$HOME/.codex/skills"
+     backup=""
+     for source in "$bait_path"/skills/*; do
+       [ -d "$source" ] || continue
+       name=${source##*/}
+       if [ -d "$legacy/$name" ]; then
+         [ -n "$backup" ] || backup=$(mktemp -d "$HOME/.codex/skills-backup.XXXXXX")
+         diff -qr "$legacy/$name" "$source" || \
+           echo "Legacy $name differed; its full copy will be preserved in $backup."
+       fi
+       for destination in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+         mkdir -p "$destination/$name"
+         rsync -a --delete "$source/" "$destination/$name/"
+       done
+       if [ -d "$legacy/$name" ]; then mv "$legacy/$name" "$backup/"; fi
+     done
      ```
    - Windows (PowerShell):
      ```powershell
-     New-Item -ItemType Directory -Force "$HOME/.claude/skills", "$HOME/.codex/skills" | Out-Null
-     Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.claude/skills/"
-     Copy-Item -Recurse -Force "<bait_path>/skills/*" "$HOME/.codex/skills/"
+     $legacy = "$HOME/.codex/skills"
+     $backup = "$HOME/.codex/skills-backup-$(Get-Date -Format yyyyMMdd-HHmmss)"
+     foreach ($source in Get-ChildItem "<bait_path>/skills" -Directory) {
+       $name = $source.Name
+       if (Test-Path "$legacy/$name") {
+         New-Item -ItemType Directory -Force $backup | Out-Null
+         Move-Item "$legacy/$name" "$backup/$name"
+         if ((Get-ChildItem "$backup/$name" -Recurse | Measure-Object).Count -gt 0) {
+           Compare-Object (Get-Content "$backup/$name/SKILL.md") (Get-Content "$($source.FullName)/SKILL.md") |
+             Out-File "$backup/$name-differences.txt"
+         }
+       }
+       foreach ($destination in @("$HOME/.claude/skills", "$HOME/.agents/skills")) {
+         New-Item -ItemType Directory -Force "$destination/$name" | Out-Null
+         robocopy $source.FullName "$destination/$name" /E /PURGE | Out-Null
+       }
+     }
      ```
    - Sync only folders supported by the installed agent(s). Claude Code uses
-     `~/.claude/skills/`; Codex uses `~/.codex/skills/`. Other agents can read BAIT through
+     `~/.claude/skills/`; Codex uses `~/.agents/skills/`. Other agents can read BAIT through
      `AGENTS.md` and the configured `bait_path`.
-   - This overwrites BAIT-managed skill folders only; it does not touch unrelated skills.
+   - This replaces BAIT-managed skill folders only; it does not touch unrelated skills.
+     The legacy migration backs up and moves only matching BAIT skill folders; compare any
+     reported differences with the saved copy and reconcile wanted edits into BAIT's source.
    - **Knowledge needs no re-copy if it's a symlink.** The applicable agent-level
      `knowledge/` directory should point to `<bait_path>/knowledge`, so `git pull` refreshes
      it automatically. Verify the links:
      ```bash
      [ -L ~/.claude/knowledge ] || ln -sfn "<bait_path>/knowledge" ~/.claude/knowledge
-     [ -L ~/.codex/knowledge ] || ln -sfn "<bait_path>/knowledge" ~/.codex/knowledge
-     rm -rf ~/.claude/skills/knowledge   # remove stale misplaced copy from older installs
-     rm -rf ~/.codex/skills/knowledge
+     [ -L ~/.agents/knowledge ] || ln -sfn "<bait_path>/knowledge" ~/.agents/knowledge
      ```
      On Windows, if knowledge was **copied** rather than symlinked, re-copy it to each
      applicable location:
      ```powershell
      Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.claude/knowledge"
-     Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.codex/knowledge"
+     Copy-Item -Recurse -Force "<bait_path>/knowledge" "$HOME/.agents/knowledge"
      ```
+     If a legacy `skills/knowledge` directory exists, verify it is BAIT's misplaced copy
+     before removing it.
 4. If the field glossary source (the XSD) or `scripts/distill_xsd.R` changed, offer to
    regenerate `knowledge/field-glossary.md`:
    ```bash
