@@ -57,12 +57,22 @@ BAIT is part of the [Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise
 [wise-presentations](https://github.com/DeepWaterIMR/wise-presentations). Use each project's
 own skills and routing guidance for its workflow.
 
+BAIT owns Biotic access, privacy, database maintenance, and Biotic-specific analysis; it remains
+usable on its own. Use **`r-code-style`** for every managed R task. wise-writing owns shared
+scientific writing, package-loading, and generic Quarto-reporting skills; BAIT's local
+`r-package-setup` and `quarto-reporting` entries are forwarding compatibility routes, not
+BAIT-owned skills. Install wise-writing on demand when those shared skills are needed. In
+Fiskwise-managed mode, follow `fiskwise-install`, `fiskwise-update`, or `fiskwise-uninstall`;
+honor saved R-install consent, disabled toggles, and `renv.lock`, and do not duplicate clone,
+registration, or dependency updates. Use `fiskwise-workflow` for requests spanning packs.
+Database refresh remains a separate opt-in action.
+
 ## Working across projects (important)
 
 BAIT is meant to be installed **once per machine** and used in **every** project — not cloned
-into each repo. When set up via `bait-install`, the skills are copied to supported user-level
-skill folders (`~/.claude/skills/` for Claude Code; `~/.agents/skills/` for Codex), and BAIT's
-location is saved to `~/.bait/config.json`.
+into each repo. When set up via `bait-install`, BAIT-owned skills are linked into supported
+user-level skill folders (`~/.claude/skills/` for Claude Code; `~/.agents/skills/` for Codex),
+and BAIT's location is saved to `~/.bait/config.json`.
 
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or
   requests like maps/queries/maturity ogives on it), reach for the `biotic-*` skills.
@@ -100,8 +110,9 @@ shared source of truth.
 | Make a maturity ogive / growth curve / L–W plot | [`skills/biotic-lifehistory`](skills/biotic-lifehistory/SKILL.md) |
 | Build an interactive dashboard | [`skills/biotic-dashboards`](skills/biotic-dashboards/SKILL.md) |
 | Handle data safely / opt out of training | [`skills/biotic-privacy`](skills/biotic-privacy/SKILL.md) |
-| Build or revise a reproducible Quarto HTML, Word, or PDF analysis/report | [`skills/quarto-reporting`](skills/quarto-reporting/SKILL.md) |
-| Write the package-loading header of an R script / qmd / Rmd | [`skills/r-package-setup`](skills/r-package-setup/SKILL.md) |
+| Write or revise R code in managed work | `r-code-style` |
+| Write scientific documents / use shared package-loading and reporting conventions | wise-writing `academic-*`, `r-package-setup`, and `quarto-reporting` skills (install on demand) |
+| Build a Biotic analysis or report | BAIT analysis skills plus the relevant wise-writing skills |
 
 ## Before answering any data question
 

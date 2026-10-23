@@ -9,6 +9,12 @@ Two things can be updated: **the BAIT toolkit** (skills/knowledge/recipes via `g
 **the Biotic database** (an incremental changed-year refresh). Ask the user which they want;
 default to the toolkit.
 
+For a direct machine-wide update, use `fiskwise-update` when the user has chosen managed
+lifecycle. If this skill was invoked by that workflow, handle only BAIT-specific work and leave
+pull, registry, skill registration, and dependency checks to the parent workflow. The standalone
+procedure below remains available. Database refresh is always a separate opt-in action,
+including in managed mode.
+
 ## 1. Update the toolkit (git pull + re-sync skills)
 
 1. Find the repo: `bait_path` in `~/.bait/config.json` (fall back to a search). If BAIT
@@ -32,6 +38,7 @@ default to the toolkit.
        [ -d "$source" ] || continue
        name=${source##*/}
        source_path=$(resolve_path "$source")
+       case "$name" in r-package-setup|quarto-reporting) continue ;; esac
        legacy_backup=0
        if [ -L "$legacy/$name" ] && [ "$(resolve_path "$legacy/$name")" = "$source_path" ]; then
          legacy_backup=1 # Archive the duplicate only after the canonical link is verified.
@@ -63,6 +70,7 @@ default to the toolkit.
      $backup = "$HOME/.agents/skill-backups/$(Get-Date -Format yyyyMMdd-HHmmss)"
      foreach ($source in Get-ChildItem "<bait_path>/skills" -Directory) {
        $name = $source.Name
+       if ($name -in @("r-package-setup", "quarto-reporting")) { continue }
        $sourcePath = [IO.Path]::GetFullPath($source.FullName)
        $legacyItem = Get-Item -Force "$legacy/$name" -ErrorAction SilentlyContinue
        $legacySameLink = $false
@@ -99,6 +107,9 @@ default to the toolkit.
        }
      }
      ```
+   - `r-package-setup` and `quarto-reporting` are forwarding compatibility entries for
+     wise-writing; do not register them as BAIT skills. Ensure the canonical shared skills are
+     available on demand when the requested task needs them.
    - Sync only folders supported by the installed agent(s). Claude Code uses
      `~/.claude/skills/`; Codex uses `~/.agents/skills/`. Other agents can read BAIT through
      `AGENTS.md` and the configured `bait_path`.

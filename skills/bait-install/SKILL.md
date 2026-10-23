@@ -9,6 +9,11 @@ Goal: get BAIT working **once per machine** so it's available in **every** proje
 copied into each repo. Run these four steps in order. Stop and resolve any blocker before
 moving on.
 
+For a direct machine-wide install, use `fiskwise-install` when the user has chosen managed
+lifecycle. If this skill was invoked by that workflow, continue only the BAIT-specific privacy
+and optional database steps; leave clone, registry, skill registration, and dependency work to
+the parent workflow. The standalone procedure below remains available.
+
 > Trigger: the user prompts *"install https://github.com/DeepWaterIMR/BAIT"* (or similar).
 
 ---
@@ -77,7 +82,10 @@ instead of repeatedly asking.
    The second line enables the version-stamping `pre-commit` hook, so a user who
    contributes a recipe back gets the version bump for free. It is harmless for users who
    never commit.
-6. **Record the install** so every future session/project can find it:
+6. **Record the install** so every future session/project can find it. In managed mode, pass
+   the pack path and any chosen database path/provenance to `fiskwise-install`; let that
+   lifecycle merge the registry and `~/.bait/config.json` without overwriting unrelated fields.
+   For standalone installation:
    - Write/merge `~/.bait/config.json`. On Windows, store `bes_db_path` as an explicit
      `%USERPROFILE%`-based absolute path rather than `~`, because R can expand `~` to
      Documents. Example macOS/Linux config:
@@ -105,6 +113,7 @@ instead of repeatedly asking.
        [ -d "$source" ] || continue
        name=${source##*/}
        source_path=$(resolve_path "$source")
+       case "$name" in r-package-setup|quarto-reporting) continue ;; esac
        legacy_backup=0
        if [ -L "$legacy/$name" ] && [ "$(resolve_path "$legacy/$name")" = "$source_path" ]; then
          legacy_backup=1 # Archive the duplicate only after the canonical link is verified.
@@ -136,6 +145,7 @@ instead of repeatedly asking.
      $backup = "$HOME/.agents/skill-backups/$(Get-Date -Format yyyyMMdd-HHmmss)"
      foreach ($source in Get-ChildItem "<bait_path>/skills" -Directory) {
        $name = $source.Name
+       if ($name -in @("r-package-setup", "quarto-reporting")) { continue }
        $sourcePath = [IO.Path]::GetFullPath($source.FullName)
        $legacyItem = $null
        $legacySameLink = $false
@@ -180,6 +190,10 @@ instead of repeatedly asking.
      unrelated folders there untouched. Compare any reported differences with the saved copy
      and reconcile wanted edits into BAIT's source before the next sync. For other agents,
      point project/agent instructions at `<bait_path>` and rely on the saved config.
+   - `r-package-setup` and `quarto-reporting` are forwarding compatibility entries for
+     wise-writing. Do not register them as BAIT skills. Ensure wise-writing is available on
+     demand when a task needs its shared reporting or package-loading skills; do not install
+     wise-writing solely because BAIT is installed.
    - If a destination skill is already a valid symlink to the exact source skill folder, leave
      it in place; pulling BAIT updates it automatically. Never copy or sync a source onto its
      own symlink. Back up a differing folder or link before replacing it.
@@ -211,17 +225,25 @@ should make you reach for the `biotic-*` skills automatically, in any project.
 ## Step 3 — Locate or install the Biotic database (BES DuckDB)
 
 1. **Look for it:** check `bes_db_path` from `~/.bait/config.json`, then the default
-   `~/IMR_biotic_BES_database/bioticexplorer.duckdb`. If present, skip to Step 4.
+   `~/IMR_biotic_BES_database/bioticexplorer.duckdb`. If present, adopt it and skip to Step 4;
+   never claim an existing database as BAIT-created.
 2. **If missing, ask whether to install it.** It's a large download (>2 GB, can take hours).
 3. **If yes, ask for the location** using the **same rules as Step 2** (no root/system dirs;
    suggest a default). **Strongly recommend the default `~/IMR_biotic_BES_database/` on
    macOS/Linux, or `%USERPROFILE%\IMR_biotic_BES_database\` on Windows** so the
    BioticExplorer Shiny app can auto-detect it. Also recommend **not** placing the database in
    a cloud-synced/backup folder (Dropbox, OneDrive, ownCloud, OneDrive Documents) — it's
-   large and sensitive. Record the chosen path in `~/.bait/config.json`.
+   large and sensitive. In managed mode, pass the selected path to the parent lifecycle so it
+   can merge `bes_db_path`; for standalone installation, record it in `~/.bait/config.json`.
 4. **Run the download** via [`../biotic-server-setup/SKILL.md`](../biotic-server-setup/SKILL.md)
    — it handles the intranet check, runs the download as a background/`screen` job with a log,
-   monitors it, and swaps in the new database on success.
+   monitors it, and swaps in the new database on success. Record database creation provenance
+   only when the destination was confirmed absent before this approved compile and the compile
+   and verification succeeded. A database is user data: uninstall does not remove it by
+   default, and any removal is a separate explicit action that keeps its sidecars and backups.
+   For managed installation, pass provenance only through the Fiskwise lifecycle registry at
+   `~/.fiskwise/config.json`; standalone installs record the selected `bes_db_path` but must
+   not infer ownership from the path or filename.
 
 ---
 

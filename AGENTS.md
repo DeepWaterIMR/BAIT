@@ -56,12 +56,34 @@ BAIT is part of the [Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise
 [wise-presentations](https://github.com/DeepWaterIMR/wise-presentations). Use each project's
 own skills and routing guidance for its workflow.
 
+### Pack boundaries and shared skills
+
+BAIT owns Biotic data access, privacy, database maintenance, and Biotic-specific analysis. It
+remains installable on its own; do not require Fiskwise or unrelated packs for Biotic work.
+When the user chooses Fiskwise-managed lifecycle, follow `fiskwise-install`,
+`fiskwise-update`, or `fiskwise-uninstall` without repeating clone, registry, skill-registration,
+or dependency steps. The registry lives in `~/.fiskwise/config.json`. `bait-install` remains the
+standalone entry point. Use `fiskwise-workflow` to route requests spanning multiple packs.
+
+Use the installed **`r-code-style`** skill for every managed R task. wise-writing owns shared
+scientific writing, document conventions, package-loading guidance, and generic Quarto
+reporting. BAIT keeps Biotic-specific methods and privacy. The local `r-package-setup` and
+`quarto-reporting` entries are forwarding compatibility routes, not BAIT-owned skills; never
+register or sync those entries as BAIT skills. Install/update wise-writing on demand when a
+task needs its shared skills, not as a mandatory effect of installing BAIT.
+
+For managed R dependency work, honor saved install consent. A disabled install toggle or
+environment variable and a project `renv.lock` take precedence; otherwise inspect and report
+missing dependencies without installing unless consent permits it. Do not reinstall or update
+dependencies already handled by the lifecycle. Database refresh is a separate opt-in action.
+
 ## Working across projects (important)
 
 BAIT is meant to be installed **once per machine** and used in **every** project — not cloned
 into each repo. When set up via `bait-install`, BAIT's location is saved to
-`~/.bait/config.json` and, where supported, skills are copied to the agent's user-level skills
-folder (`~/.agents/skills/` for Codex; `~/.claude/skills/` for Claude Code). Other agents can
+`~/.bait/config.json` and, where supported, BAIT-owned skills are linked into the agent's
+user-level skills folder (`~/.agents/skills/` for Codex; `~/.claude/skills/` for Claude Code).
+Other agents can
 read skills from the saved `bait_path` through project/agent instructions.
 
 - **Trigger:** whenever a task involves IMR **Biotic** data (the keyword "biotic", or
@@ -100,8 +122,9 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 | Make a maturity ogive / growth curve / L–W plot | `skills/biotic-lifehistory/SKILL.md` |
 | Build an interactive dashboard | `skills/biotic-dashboards/SKILL.md` |
 | Handle data safely / opt out of training | `skills/biotic-privacy/SKILL.md` |
-| Build or revise a reproducible Quarto HTML, Word, or PDF analysis/report | `skills/quarto-reporting/SKILL.md` |
-| Write the package-loading header of an R script / qmd / Rmd | `skills/r-package-setup/SKILL.md` |
+| Write or revise R code in managed work | `r-code-style` |
+| Write scientific documents or use shared package-loading/reporting conventions | wise-writing `academic-*`, `r-package-setup`, and `quarto-reporting` skills (install on demand) |
+| Build a Biotic analysis or report | BAIT analysis skills plus the relevant wise-writing skills |
 
 ## Before answering any data question
 

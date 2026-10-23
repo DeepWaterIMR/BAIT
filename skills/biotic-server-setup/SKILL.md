@@ -47,6 +47,13 @@ Before a **first download (Step 2)** or an **update (Step 3)**, ensure the local
 schema (e.g. the `taxaindex` table) — change over time, so running an old version against the
 live data can produce a broken or out-of-date database.
 
+In Fiskwise-managed mode, R package checks and changes must go through the consent-aware
+Fiskwise package-management workflow. Respect its saved R-install consent, disabled install
+environment variables, project `renv.lock`, and version pins; do not install or update a
+package a second time. If package installation/update is not permitted, report that the
+database operation cannot proceed until the user chooses an allowed package setup. Standalone
+use continues below with the user's authorization.
+
 ```r
 if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
 # remotes compares the installed git SHA against GitHub and reinstalls ONLY if there is a
