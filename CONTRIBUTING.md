@@ -40,22 +40,13 @@ no real data leaked in — before committing.
 
 ## Versioning
 
-BAIT's version and date live in [`VERSION`](VERSION) and are stamped automatically by a
-`pre-commit` hook. **Enable it once per clone:**
-
-```bash
-git config core.hooksPath .githooks
-```
-
-- The **patch** level bumps on every commit; the date is set to the commit day.
-- Bump the **minor** or **major** level by hand in `VERSION` before committing — the hook
-  keeps a hand-set version and only refreshes the date. Use a minor bump for new skills or
-  a reorganised knowledge base, and reserve a major bump for changes that break existing
-  installs.
-- The hook also mirrors the stamp into the `<!-- version -->` line in `README.md`, unless
-  the README has unstaged edits (it will not sweep unrelated work into your commit).
-- Never edit `VERSION` in the same commit as unrelated work expecting it to survive
-  untouched — the hook always rewrites the date.
+BAIT's version and date live in [`VERSION`](VERSION); the hook also stamps the README version
+line. Follow the [shared Fiskwise version policy](https://github.com/DeepWaterIMR/fiskwise/blob/main/docs/VERSIONING.md).
+Every ordinary authored commit increments the patch by 0.0.1 and stamps the current date. A
+minor or major bump requires an explicit user request and `FISKWISE_VERSION_BUMP=minor|major`;
+never choose one autonomously or create tags/releases automatically. Let `.githooks/pre-commit`
+enforce the policy, preserve other custom hooks, and replay existing stamps unchanged during
+merges or rebases.
 
 ## Style
 

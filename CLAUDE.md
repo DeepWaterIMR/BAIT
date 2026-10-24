@@ -142,8 +142,13 @@ shared source of truth.
 
 `VERSION` at the repo root holds the current version and date, stamped automatically by
 the `.githooks/pre-commit` hook (see [`CONTRIBUTING.md`](CONTRIBUTING.md)). Read that file
-when the user asks what version they are running, or when reporting a problem. Do not
-hand-edit the date; to raise the minor or major level, edit the version line and commit.
+when the user asks what version they are running, or when reporting a problem. Follow the
+[shared Fiskwise version policy](https://github.com/DeepWaterIMR/fiskwise/blob/main/docs/VERSIONING.md).
+Ordinary authored commits increment the patch by 0.0.1 and stamp the current date (`VERSION`
+for knowledge packs; `DESCRIPTION` `Version` and `Date` for R packages). A minor or major bump
+requires an explicit user request and `FISKWISE_VERSION_BUMP=minor|major`. Never choose one
+autonomously or create tags/releases automatically. Preserve other custom hooks and replay
+existing stamps unchanged during merges or rebases.
 
 ## Learning loop
 
