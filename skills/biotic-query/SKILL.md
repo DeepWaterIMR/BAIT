@@ -26,37 +26,43 @@ description: Turn a natural-language question about IMR Biotic data into a tidyv
    are codes, not labels (`sex 1 = Female`, `2 = Male`). See
    [`../../knowledge/reference-codes.md`](../../knowledge/reference-codes.md).
 8. **Answer the whole question.** "Largest" is ambiguous → give **both** longest and heaviest.
-9. **Sanity-check extremes for data-entry errors.** The single `max()` is the record most
-   likely to be a typo. Pull the **top ~10**, check against biology / Fulton's K, tell the user
-   about likely typos, and report the largest **plausible** record — never the raw max. See
+9. **Review extreme-value candidates.** Pull a small top set, check units, biology, and mission
+   and station context, then present candidates with evidence and uncertainty. Do not
+   auto-exclude a station or record based on repeated serial numbers or a generic threshold.
+   Confirm suspected errors with source/context review. See
    [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md).
 10. If the question is new, **offer to save a cookbook recipe** (see `../../CONTRIBUTING.md`).
 
 ## Patterns
 
-**Largest / extreme value — pull the top N, sanity-check, report the largest *plausible* row**
-The single max is the record most likely to be a data-entry error. Pull the **top ~10**
-(cheap — still reduced in DuckDB), flag implausible rows, and answer with the largest plausible
-one. Report both length and weight, since "largest" is ambiguous.
+**Largest / extreme value — review candidates, then explain uncertainty**
+Pull a small top set in DuckDB and keep ties. Check units, biology, age, and mission/station
+context. Repeated serial numbers or unusual K values are clues to investigate, not automatic
+exclusions or proof of error. Confirm suspected errors against source/context before deciding
+which candidate to report.
+
 ```r
-# Top heaviest candidates, descending — only N rows collected
+# Top heaviest candidates, descending — only a small set is collected
 cand <- indall |>
   filter(commonname == "torsk", !is.na(individualweight)) |>
-  slice_max(individualweight, n = 10) |>
-  select(startyear, serialnumber, length, individualweight, age, sex) |>
+  slice_max(individualweight, n = 10, with_ties = TRUE) |>
+  select(missionid, missiontype, startyear, platform, missionnumber,
+         station, serialnumber, length, individualweight, age, sex) |>
   collect() |>
   mutate(
     length_cm = length * 100,
-    K = 100 * (individualweight * 1000) / (length_cm)^3,   # Fulton's K (~0.8–1.5 for cod)
-    flag = is.na(K) | K < 0.4 | K > 3 | individualweight > 60   # tune per species
+    K = if_else(
+      !is.na(length_cm) & length_cm > 0 & !is.na(individualweight),
+      100 * individualweight * 1000 / length_cm^3,
+      NA_real_
+    )
   )
 
-cand                                                       # inspect: flagged = suspected typos
-heaviest <- cand |> filter(!flag) |> slice_max(individualweight, n = 1)  # the real answer
-# Do the same for `length` (longest), flagging against a plausible max length for the species.
+cand  # inspect candidates; K is a screening metric, not an automatic filter
 ```
-Don't `collect()` all cod and take the max in R — that pulls millions of rows. Don't report the
-raw `max()` either — it may be a typo. See
+
+Don't `collect()` all cod and take the max in R — that pulls millions of rows. Don't report an
+unchecked `max()` as a confirmed result. See
 [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md) and the recipe
 [`../../cookbook/largest-cod.md`](../../cookbook/largest-cod.md).
 
@@ -110,9 +116,9 @@ nothing for those without erroring, so check the ad-hoc table in the same file. 
 - **Memory:** never `collect()` a whole table; do max/mean/count in DuckDB; count + estimate
   before a large collect and ask the user. See
   [`../../knowledge/performance.md`](../../knowledge/performance.md).
-- **Data-entry errors:** the extreme tail is where typos hide (a 179 cm cod, an 18 100 kg
-  fish). Never report the raw `max()` as "the largest"; pull the top ~10, flag the implausible
-  ones for the user, and answer with the largest plausible record. See
+- **Extreme values:** retrieve a small candidate set and inspect units, biology, and composite
+  mission/station context. An unusual value or repeated identifier prompts review; it is not
+  proof of error. Do not auto-exclude records. See
   [`../../knowledge/data-quality.md`](../../knowledge/data-quality.md).
 - **Privacy:** show the user aggregates/derived results; never paste large raw extracts into
   the chat or write them to committed files.

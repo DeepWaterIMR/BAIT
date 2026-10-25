@@ -4,7 +4,7 @@ subtitle: "Biotic goes agentic"
 ---
 
 **BAIT teaches your AI coding agent (Claude Code, Codex, Cursor, Mistral Vibe, …) to work with the IMR
-Biotic database — and keeps your raw data on your own machine.**
+Biotic database. Most Biotic data are open; some subsets and outputs are restricted or sensitive.**
 
 Ask in plain language:
 
@@ -29,8 +29,9 @@ Ask in plain language:
 
 ## It is **not** a trained model
 
-Your data never leaves your computer and never enters any model's weights. The agent simply
-*reads the BAIT repository* while it helps you. See [Privacy](privacy.qmd).
+BAIT is a knowledge pack, not a model trained on Biotic records. Local R/DuckDB execution does
+not guarantee that prompts, tool inputs, logs, or outputs stay on-device or are excluded from
+provider processing, retention, or training. See [Privacy](privacy.qmd).
 
 ## Get going
 

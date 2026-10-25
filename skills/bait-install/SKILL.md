@@ -1,6 +1,6 @@
 ---
 name: bait-install
-description: 'Install or set up BAIT (Biotic AI Toolkit) for working with IMR Biotic data. Use when the user says "install BAIT", "install https://github.com/DeepWaterIMR/BAIT", "set up BAIT", or first asks to work with Biotic data and BAIT is not yet installed. Runs the full onboarding: privacy gate, clone BAIT, install skills globally, set up the database, verify the connection.'
+description: 'Install or set up BAIT (Biotic AI Toolkit) for working with IMR Biotic data. Use when the user says "install BAIT", "install https://github.com/DeepWaterIMR/BAIT", "set up BAIT", or first asks to work with Biotic data and BAIT is not yet installed. Runs setup review for data classification and provider handling, then clones BAIT, install skills globally, set up the database, verify the connection.'
 ---
 
 # Install BAIT
@@ -18,36 +18,20 @@ the parent workflow. The standalone procedure below remains available.
 
 ---
 
-## Step 1 — Privacy gate (blocking once at install/onboarding)
+## Step 1 — Privacy and classification review
 
-Biotic data is confidential. Before anything else:
+Most Biotic data are open; some subsets are restricted or sensitive. Review the classification
+of the data and outputs to be used, and the active provider/account's transmission, retention,
+and training behavior. Local R/DuckDB execution does not guarantee that prompts, tools, logs,
+or outputs stay on-device. A training opt-out is not a guarantee against transmission or
+retention. Consult [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md) and current
+provider documentation.
 
-1. **Check whether onboarding was already recorded.**
-   - If `~/.bait/config.json` already contains `privacy_onboarded_at`, treat the privacy
-     onboarding as already completed for this machine/setup.
-   - In that case, do **not** re-gate a reinstall/repair on a fresh confirmation; a short
-     reminder is enough.
-2. **Otherwise, try to detect** whether model-training / data-retention is off for the agent you are.
-   - If you can determine it (e.g. you're running on an API/enterprise/ZDR tier where inputs
-     are not used for training), confirm that to the user and continue.
-   - If you **cannot** verify it programmatically, do **not** assume it's off.
-3. **If unverified or on a consumer tier**, tell the user clearly:
-   > "Model training has to be turned off before using BAIT."
-   Then give **agent-specific** instructions for turning it off (write them for the agent you
-   actually are — Claude Code, Codex, Cursor, …; point to the provider's current privacy /
-   data-controls page since menus change). See
-   [`../biotic-privacy/SKILL.md`](../biotic-privacy/SKILL.md).
-4. **Gate on explicit confirmation once.** Present a single choice the user must select:
-   **"I have turned off model training."** Do not proceed until they pick it. (In Claude Code
-   use a selection prompt; otherwise ask and wait for an unambiguous yes.)
-5. **Persist the onboarding result** in `~/.bait/config.json` as `privacy_onboarded_at`
-   (date) and optionally `privacy_onboarded_for` (agent name / tier) so future agents know
-   not to re-ask on every routine query.
-
-Never skip this step on a first install. For later maintenance runs, use the recorded marker
-instead of repeatedly asking.
-
----
+For open data, proceed with routine work under its license and provider terms. For restricted
+or unknown-classification material, keep it local unless external processing is authorized
+under IMR rules. An existing `privacy_onboarded_at` records a past review only; do not treat it
+as proof of current settings or require repeated confirmation for ordinary open-data queries.
+If useful, record the review date and provider/account in `~/.bait/config.json`.
 
 ## Step 2 — Locate or clone the BAIT repo
 

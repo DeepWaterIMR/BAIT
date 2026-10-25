@@ -19,8 +19,7 @@ d <- indall |>
 ```
 
 `ggFishPlots` expects columns like `length`, `individualweight`, `age`, `sex`,
-`maturationstage`. Remember `length` is in **metres** — convert if a function or the user
-expects cm (`length * 100`).
+`maturationstage`. Biotic `length` is in **metres**. Convert to cm before calling ggFishPlots, whose length scale and default label use cm (`length_cm = length * 100`).
 
 ## Functions
 
@@ -28,7 +27,32 @@ expects cm (`length * 100`).
 library(ggFishPlots)
 
 # Maturity ogive + L50 (give the maturity column; check its name/coding in the glossary)
-plot_maturity(d, length = "length", maturity = "maturationstage", split.by = "sex")
+# Confirm species-specific mature stages from an authoritative reference first.
+# Do not treat maturationstage codes as a universal binary mapping.
+# Set these only after checking an authoritative species-specific source.
+mature_codes <- NULL
+immature_codes <- NULL
+stopifnot(length(mature_codes) > 0, length(immature_codes) > 0)
+
+d_l50 <- d |>
+  mutate(
+    length_cm = length * 100,
+    mature = case_when(
+      maturationstage %in% mature_codes ~ 1L,
+      maturationstage %in% immature_codes ~ 0L,
+      TRUE ~ NA_integer_
+    )
+  ) |>
+  filter(!is.na(mature))
+fit <- plot_maturity(
+  d_l50,
+  length = "length_cm",
+  maturity = "mature",
+  sex = "sex",
+  split.by.sex = TRUE
+)
+fit$plot
+fit$params
 
 # Growth model: von Bertalanffy (default), Gompertz, or logistic -> Linf, K, t0
 plot_growth(d, length = "length", age = "age")
@@ -42,9 +66,9 @@ plot_catchcurve(d, age = "age")
 
 - Each function returns a list; grab `$params` (e.g. L50, L∞, K, a, b, Z) and report them.
 - Use a consistent look with `+ ggFishPlots::theme_fishplots()`.
-- Maturity coding: `maturationstage` is an NMDreference **code** — confirm which stages mean
-  "mature" for the species before fitting (see [`../../knowledge/field-glossary.md`](../../knowledge/field-glossary.md)).
-- Check the function signatures (`?ggFishPlots::plot_maturity`) — argument names can evolve.
+- Maturity coding: `maturationstage` is an NMDreference **code** — confirm a species-specific binary mature/immature
+  mapping from an authoritative source before fitting; do not guess a general threshold (see [`../../knowledge/field-glossary.md`](../../knowledge/field-glossary.md)).
+- Check the function signatures (`?ggFishPlots::plot_maturity`) — argument names can evolve. Current API uses `split.by.sex` (not `split.by`) and returns `$plot` and `$params`.
 
 ## Worked example
 
@@ -53,5 +77,5 @@ Maturity ogive for ling from the Coastal survey:
 
 ## Privacy
 
-Fitted parameters and figures are derived outputs and generally shareable. The underlying
-individual records are not — keep them local.
+Handle results according to source classification. Even fitted parameters or figures may
+reveal restricted information; keep sensitive outputs local unless sharing is authorized.

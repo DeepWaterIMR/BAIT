@@ -25,9 +25,11 @@ as a safety net — do not loosen it.
 
 ### Letting your agent draft it
 
-After your agent solves something new, just say *"save this as a BAIT recipe."* It will
-copy the template, fill it in, and show you the draft. **You review it** — especially that
-no real data leaked in — before committing.
+After a useful solution or correction, the agent may record a project-local candidate using
+`knowledge/learning-candidate-template.md`. Include context, evidence, scope, confidence, and
+user corrections; use only synthetic/sanitized evidence. Candidates are not automatically
+published. A user-reviewed, sanitized reusable convention can then be promoted to the cookbook,
+preserving its scope and uncertainty. Never promote raw records or restricted details.
 
 ## Improving skills or knowledge
 

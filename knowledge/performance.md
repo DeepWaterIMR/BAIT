@@ -14,24 +14,21 @@ R memory with `collect()`. **Do the work in DuckDB; collect only the small final
 4. **`select()` only the columns you need** before `collect()` (narrower = lighter).
 5. **Estimate before a big/unknown collect, and ask if it's large** (see below).
 
-## Extremes the memory-safe way (the "largest cod" lesson)
+## Extreme candidates the memory-safe way
 
-❌ **Don't** pull every cod into R and then find the max:
-```r
-indall |> filter(commonname == "torsk") |> collect() |> slice_max(length)   # collects millions of rows
-```
+For an extreme-value question, retrieve a small top candidate set in DuckDB rather than all
+records. Keep ties and include enough composite mission/station context to review candidates.
+An extreme value or repeated serial number is a prompt to investigate, not proof of error; do
+not automatically exclude records. See [`data-quality.md`](data-quality.md) for review guidance.
 
-✅ **Do** the reduction in DuckDB so only the matching row(s) come back:
 ```r
 indall |>
   filter(commonname == "torsk", !is.na(length)) |>
-  filter(length == max(length, na.rm = TRUE)) |>          # computed in DuckDB
-  select(commonname, startyear, serialnumber, length, individualweight, age, sex) |>
+  slice_max(length, n = 10, with_ties = TRUE) |>
+  select(missionid, missiontype, startyear, platform, missionnumber,
+         station, serialnumber, length, individualweight, age, sex) |>
   collect()
 ```
-
-(`slice_max(length, n = 1)` *can* be pushed down by dbplyr, but the explicit
-`filter(x == max(x))` is reliably evaluated in the database.)
 
 ## Estimate before collecting an unknown-sized result
 

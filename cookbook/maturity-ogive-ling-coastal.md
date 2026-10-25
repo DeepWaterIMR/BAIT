@@ -48,12 +48,30 @@ filtExp <- paste(sapply(csFilt, function(k) paste0(
 d <- indall |>
   filter(!!!rlang::parse_exprs(filtExp)) |>
   filter(commonname == "lange", !is.na(length), !is.na(maturationstage)) |>
-  collect()
+  collect() |>
+  mutate(length_cm = length * 100)
 
-# Inspect maturity coding before deciding the mature/immature split:
-# d |> count(maturationstage)
+# Inspect stages, then fill these sets only after confirming a species-specific,
+# authoritative definition. These placeholders intentionally do not guess a mapping.
+d |> count(maturationstage)
+mature_codes <- NULL # Fill from a verified species-specific source.
+immature_codes <- NULL # Fill from the same source.
+stopifnot(length(mature_codes) > 0, length(immature_codes) > 0)
+d_l50 <- d |>
+  mutate(mature = case_when(
+    maturationstage %in% mature_codes ~ 1L,
+    maturationstage %in% immature_codes ~ 0L,
+    TRUE ~ NA_integer_
+  )) |>
+  filter(!is.na(mature))
 
-fit <- plot_maturity(d, length = "length", maturity = "maturationstage")  # check ?plot_maturity
+fit <- plot_maturity(
+  d_l50,
+  length = "length_cm",
+  maturity = "mature",
+  sex = "sex",
+  split.by.sex = TRUE
+)
 fit$plot      # the ogive
 fit$params    # L50 (and CI), sample sizes
 
@@ -68,11 +86,11 @@ sample size. (Exact value depends on the data and the mature/immature definition
 
 ## Notes & caveats
 
-- **Confirm `plot_maturity()`'s argument names/coding** with `?ggFishPlots::plot_maturity` —
-  it may want a binary maturity column or a specific stage threshold.
-- `length` is in metres; if the function or labels expect cm, pass `length * 100` or set the
-  axis accordingly.
-- Split by sex (`split.by = "sex"`) if the user wants male/female ogives.
+- `plot_maturity()` expects binary maturity (TRUE/FALSE or 1/0), uses `split.by.sex`, and
+  returns a list with `$plot` and `$params`. Confirm current signatures in package help.
+- Biotic `length` is in metres; this example converts it to centimetres before fitting.
+- The mature/immature stage sets are intentionally placeholders. Confirm them for ling from an
+  authoritative species-specific source; never apply a universal maturationstage threshold.
 - Small samples → unstable L50; report n and CI.
 
 ## Related

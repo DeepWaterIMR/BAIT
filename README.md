@@ -24,21 +24,24 @@ BAIT is a knowledge pack that turns a general coding agent (Claude Code, Codex, 
    organisation's Word template when supplied, the bundled IMR web-report template when
    explicitly requested, or a generic Manuscript design otherwise.
 
-> **It is not a trained model.** Your data is never sent anywhere and never enters any
-> model's weights. The agent simply *reads this repo* while it helps you. See
+> **It is a knowledge pack, not a model trained on Biotic records.** Local R/DuckDB work
+> does not guarantee that prompts, tool inputs, logs, or outputs stay on-device or are excluded
+> from provider processing, retention, or training. See
 > [Privacy](#-privacy-first).
 
 ## 🔒 Privacy first
 
-Some Biotic data are confidential, and some are sensitive. BAIT is built so the **raw data stays on your computer**:
+Most Biotic data are open; some subsets are restricted or sensitive. Classify data and outputs under IMR rules. Local execution does not guarantee that agent prompts, tools, logs, or outputs stay on-device:
 
-- BAIT contains **instructions only — never data**. The `.gitignore`/`.claudeignore` files
-  block every common data extension as a safety net.
+- BAIT contains **instructions only — never database records**. Examples and cookbook recipes
+  use code and synthetic values, not real records. Ignore files block common data extensions
+  as a safety net.
 - The database lives **outside** this repo (`~/IMR_biotic_BES_database/` by default on
-  macOS/Linux; `%USERPROFILE%\IMR_biotic_BES_database\` on Windows).
-- During setup, **turn off model training / data retention** for your agent once — BAIT
-  walks you through it and records that onboarding, then uses reminders rather than blocking
-  every later query
+  macOS/Linux; `%USERPROFILE%\IMR_biotic_BES_database\` on Windows). These are defaults; the
+  configured `bes_db_path` takes precedence.
+- During setup, review provider training, retention, and tool-transmission controls. An
+  onboarding record reflects a past review; settings may change, and a training opt-out does
+  not guarantee no transmission or retention
   ([`skills/biotic-privacy`](skills/biotic-privacy/SKILL.md)).
 
 ## 🚀 Quickstart
@@ -50,7 +53,7 @@ Some Biotic data are confidential, and some are sensitive. BAIT is built so the 
    install https://github.com/DeepWaterIMR/BAIT
    ```
    The agent runs [`bait-install`](skills/bait-install/SKILL.md) and walks you through:
-   a one-time **model training is off** onboarding check → cloning BAIT to a sensible place
+   a privacy and data-classification review → cloning BAIT to a sensible place
    → installing the skills **globally** (so BAIT works in every project) → setting up the
    database → verifying the connection.
 3. **Ask away**: *"What's the largest cod in the database?"*, *"Map cusk on EggaN."*

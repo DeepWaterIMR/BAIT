@@ -8,12 +8,13 @@ Any capable coding agent works: [Claude Code](https://claude.com/claude-code),
 [Codex](https://openai.com/codex), Cursor, Gemini CLI, … BAIT ships entry points for all of
 them (`CLAUDE.md` for Claude Code, `AGENTS.md` for the others).
 
-## 2. Turn off training — *before* touching data
+## 2. Check data classification and provider handling
 
-This is the one step you must not skip. In your agent's privacy / data-controls settings,
-disable model training / enable zero-data-retention. BAIT walks you through it; the principle
-is in [Privacy](privacy.qmd). When in doubt, prefer API/enterprise tiers with zero data
-retention over consumer tiers.
+Most Biotic data are open, while some subsets are restricted or sensitive. Check IMR
+classification rules before sharing data or outputs. Local R/DuckDB execution does not guarantee
+that prompts, tools, logs, or outputs stay on-device. Review the active provider settings for
+transmission, retention, and training separately; a training opt-out is not a no-transmission
+guarantee. See [Privacy](privacy.qmd).
 
 ## 3. Install BAIT — one prompt
 
@@ -25,8 +26,7 @@ install https://github.com/DeepWaterIMR/BAIT
 
 The agent takes it from there and walks you through:
 
-1. **Privacy gate** — confirms model training is off (and shows you how to turn it off if
-   needed).
+1. **Privacy review** — reviews classification and current provider handling settings.
 2. **Clones BAIT** to a sensible location — and *refuses to install at a drive root* like
    `C:\` for security; it suggests a safe place in your home folder.
 3. **Installs the skills globally**, so BAIT works in **every** project without re-cloning.
@@ -59,6 +59,7 @@ installed on demand when needed.
 
 ## How it learns
 
-When you ask something new, the agent offers to save the solution as a **cookbook recipe**.
-Review it, commit it, and the next person's agent benefits. The cookbook is IMR's shared,
-version-controlled memory — BAIT gets better the more it's used.
+Useful solutions and corrections can first be recorded as project-local learning candidates
+with context, sanitized evidence, scope, confidence, and user corrections. After review, a
+sanitized reusable convention can be promoted to BAIT knowledge or the cookbook with its scope
+and uncertainty preserved. Candidates are never automatically published.

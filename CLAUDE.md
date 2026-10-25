@@ -14,13 +14,17 @@ life-history.
 
 ## ⛔ PRIVACY — non-negotiable, keep in mind on every task
 
-Biotic data is confidential and some of it is sensitive (e.g. Russian-zone data, exact
-positions of vulnerable species). **The whole point of BAIT is that raw data never leaves
-the user's machine.**
+Biotic records are mostly open data. Some subsets and derived outputs are restricted or sensitive,
+including Russian-zone/reference-fleet data and exact positions of vulnerable species. Classify the
+requested data and output before sharing; when classification is unknown, keep it local until
+clarified. Local execution reduces exposure but does not guarantee that prompts, tool inputs, logs,
+or outputs stay on-device or are excluded from provider retention/training. Check the active
+provider and tool settings; follow IMR rules for restricted material.
 
-1. **Never upload, paste, or transmit raw Biotic data** to any external service, API, or
-   web tool. That includes pasting rows into a chat that reaches a model provider.
-2. **The database is not in this repo and must never be copied here.** It lives outside
+1. For restricted, sensitive, or unknown-classification data, do not transmit raw records or
+   sensitive details to external services unless approved under IMR rules. Open data can be used
+   for routine work subject to its license and provider terms.
+2. **Do not copy the database into this repo.** It lives outside
    the repo at `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (`%USERPROFILE%\IMR_biotic_BES_database\bioticexplorer.duckdb` on Windows,
    because R expands `~` through the OneDrive-redirected Documents folder there).
    Reference it by path.
@@ -28,18 +32,17 @@ the user's machine.**
    file that gets committed (cookbook, examples, docs, commit messages). Recipes and
    examples use *code*, not data — and rounded/synthetic values when an example value is
    needed.
-4. **Treat sensitive data with extra care.** Exact positions of Russian-zone catches,
-   protected species, or vulnerable habitats: when in doubt, ask the user before
-   producing or sharing an output.
-5. **Default to derived outputs.** Aggregates, model parameters, and figures are
-   generally shareable; raw records are not.
-6. **Remind the user about model training, but don't re-gate every query.** Treat
-   model-training/data-retention as a **one-time onboarding check** handled by
-   [`bait-install`](skills/bait-install/SKILL.md) and recorded in `~/.bait/config.json`
-   (`privacy_onboarded_at`). If that marker exists, **do not block routine local database
-   queries** on a fresh confirmation in every chat/session. Give a brief reminder only when
-   helpful (e.g. first Biotic task in a long while, privacy questions, or unusually
-   sensitive outputs). See [`skills/biotic-privacy`](skills/biotic-privacy/SKILL.md).
+4. **Treat restricted or sensitive material with extra care.** Exact positions of Russian-zone
+   or reference-fleet catches, protected species, or vulnerable habitats: when sharing authority
+   is unclear, keep local and clarify before producing or sharing an output.
+5. **Match handling to classification.** Open data can support routine analysis and sharing. For
+   restricted, sensitive, or unknown-classification material, minimize extracts and keep outputs
+   local until sharing is authorized; derived outputs can still disclose sensitive information.
+6. **Treat onboarding markers as historical.** `privacy_onboarded_at` records a past review of
+   provider settings; it is not proof of current settings or a guarantee against transmission or
+   retention. Do not gate routine work with open data on repeated confirmations. For restricted
+   or unknown-classification data, follow current IMR rules and verify handling before sharing.
+   See [`skills/biotic-privacy/SKILL.md`](skills/biotic-privacy/SKILL.md).
 
 If a request would breach any of the above, stop and explain rather than comply.
 
@@ -47,9 +50,10 @@ If a request would breach any of the above, stop and explain rather than comply.
 
 ## What BAIT is
 
-A vendor-neutral knowledge pack — **not** a trained model. Nothing about the user's data
-enters a model's weights. You learn the database by *reading this repo at runtime*. The
-repo is the memory; it grows as users contribute recipes (see "Learning loop" below).
+A vendor-neutral knowledge pack — **not** a model trained on Biotic records. BAIT does not
+control provider processing, transmission, retention, or training. Agents read this repo at
+runtime; the repo is the pack's memory and grows through reviewed contributions (see
+"Learning loop" below).
 
 BAIT is part of the [Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise/), alongside
 [index-wise](https://github.com/DeepWaterIMR/index-wise), [wise-writing](https://github.com/DeepWaterIMR/wise-writing),
@@ -133,9 +137,10 @@ shared source of truth.
    final result; **never `collect()` a whole table**. For large/unknown results, count and
    estimate first, and warn/ask before pulling a lot into RAM. See
    [`knowledge/performance.md`](knowledge/performance.md).
-7. **Sanity-check extremes** — for "largest / heaviest / oldest" questions the single `max()`
-   is usually a data-entry error. Pull the top ~10, flag implausible records for the user, and
-   report the largest *plausible* one — never the raw max. See
+7. **Review extreme-value candidates** — pull a small top set with ties and inspect units,
+   biology, and composite mission/station context. Treat unusual values or repeated identifiers
+   as review clues, not proof of error; do not auto-exclude. Explain evidence and uncertainty,
+   and confirm suspected errors with source/context review. See
    [`knowledge/data-quality.md`](knowledge/data-quality.md).
 
 ## Which version of BAIT is this?
@@ -152,12 +157,16 @@ existing stamps unchanged during merges or rebases.
 
 ## Learning loop
 
-After you solve a query that **isn't** already in `cookbook/`, *offer* to save it as a new
-recipe (copy [`cookbook/_TEMPLATE.md`](cookbook/_TEMPLATE.md), fill it in, propose it to
-the user). Over time the cookbook becomes IMR's shared institutional memory. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Models do not learn between sessions — *this repo* is
-how knowledge persists.
+For a useful new solution or correction, offer to save a **candidate** in the active analysis
+project (for example `.bait/learning/candidates/<slug>.md`). Record the question/context,
+synthetic or sanitized evidence, project/species/survey scope, confidence, unresolved questions,
+and any user correction. Keep candidate notes project-local and out of the BAIT repository
+until reviewed. Never include raw data, exact restricted coordinates, or confidential details.
 
+Promote only a user-reviewed, sanitized convention or reusable method to BAIT knowledge or
+the cookbook. Preserve scope and uncertainty; a single observation is not a universal rule.
+Use the candidate template in `knowledge/learning-candidate-template.md`. This loop works
+without Fiskwise and does not publish or sync candidates automatically.
 ## House style
 
 - tidyverse, not base R, for data manipulation. `|>` or `%>%` (match the user's file).
