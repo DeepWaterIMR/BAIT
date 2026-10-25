@@ -3,6 +3,18 @@ name: bait-install
 description: 'Install or set up BAIT (Biotic AI Toolkit) for working with IMR Biotic data. Use when the user says "install BAIT", "install https://github.com/DeepWaterIMR/BAIT", "set up BAIT", or first asks to work with Biotic data and BAIT is not yet installed. Runs setup review for data classification and provider handling, then clones BAIT, install skills globally, set up the database, verify the connection.'
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Install BAIT
 
 Goal: get BAIT working **once per machine** so it's available in **every** project — not

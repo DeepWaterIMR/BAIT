@@ -3,6 +3,18 @@ name: biotic-connect
 description: Connect to the IMR Biotic DuckDB database from R using tidyverse, or read NMD Biotic v3 XML files. Use whenever a task needs database access set up before querying, mapping, or analysing Biotic data.
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Connect to the Biotic data (R + tidyverse)
 
 Full reference: [`../../knowledge/connection.md`](../../knowledge/connection.md). The

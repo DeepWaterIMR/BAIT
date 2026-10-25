@@ -3,6 +3,18 @@ name: biotic-survey-analysis
 description: Design and audit quantitative survey analyses from IMR Biotic data, including sampling-unit keys, catchsample aggregation, true zeros, sample and gear qualification, effort standardization, and raising length or individual observations. Use for survey catches, stations, CPUE or density, survey time series, multisamplers, or abundance and biomass summaries.
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Analyse Biotic survey data
 
 Use this skill when the requested result depends on what constitutes a haul, which samples are quantitative, or how catch and observations are aggregated.

@@ -3,6 +3,18 @@ name: biotic-privacy
 description: Classify Biotic data and outputs, handle restricted or sensitive subsets safely, and explain provider transmission, retention, and training settings. Use for privacy questions, setup, sensitive subsets, or sharing decisions; do not block ordinary work with open data.
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Handling Biotic data safely
 
 Most Biotic data are open. Some subsets are restricted or sensitive, especially Russian-zone

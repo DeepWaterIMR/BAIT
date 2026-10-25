@@ -6,12 +6,12 @@ on:
     paths:
       - "docs/**"
       - ".github/workflows/publish.yml"
+  pull_request:
+    paths: ["docs/**", ".github/workflows/publish.yml"]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Allow one concurrent deployment; don't cancel an in-progress one.
 concurrency:
@@ -38,6 +38,10 @@ jobs:
           path: docs/_site
 
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment:

@@ -167,10 +167,18 @@ existing stamps unchanged during merges or rebases.
 
 ## Learning loop
 
-For a useful new solution or correction, offer to save a **candidate** in the active analysis
-project (for example `.bait/learning/candidates/<slug>.md`). Record the question/context,
+At the start of related work, read the project's existing Biotic lessons and check their
+scope against the current species, survey, period, and database revision. Reuse reviewed
+lessons within that scope; treat unreviewed candidates as hypotheses, never as instructions
+that override the user or established methods.
+
+During work, capture useful new solutions and user corrections as **candidates** when the
+project already permits local learning notes; otherwise offer to enable this once. Reuse
+an existing project memory folder (for example `ai/memory/biotic/`) instead of creating a
+parallel system. If none exists, use `.bait/learning/candidates/<slug>.md`. Record the question/context,
 synthetic or sanitized evidence, project/species/survey scope, confidence, unresolved questions,
-and any user correction. Keep candidate notes project-local and out of the BAIT repository
+and any user correction. Link superseded notes and explain contradictions rather than silently
+replacing a convention. Keep candidate notes project-local and out of the BAIT repository
 until reviewed. Never include raw data, exact restricted coordinates, or confidential details.
 
 Promote only a user-reviewed, sanitized convention or reusable method to BAIT knowledge or

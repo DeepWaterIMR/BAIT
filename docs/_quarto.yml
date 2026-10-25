@@ -4,7 +4,7 @@ project:
 
 website:
   title: "BAIT — Biotic AI Toolkit"
-  description: "Teach your AI agent to work with IMR Biotic data — safely, on your machine."
+  description: "Give your AI agent IMR Biotic expertise, with local analysis and source-aware data handling."
   site-url: "https://deepwaterimr.github.io/BAIT/"
   repo-url: "https://github.com/DeepWaterIMR/BAIT"
   favicon: assets/fiskwise-favicon.svg

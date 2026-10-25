@@ -3,6 +3,18 @@ name: biotic-dashboards
 description: Build interactive Biotic data dashboards — run the ready-made BioticExplorer Shiny app, or build a custom Shiny dashboard on top of the DuckDB database. Use for "interactive dashboard", "Shiny app", "explore the data interactively", "let users filter and map".
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Interactive dashboards
 
 ## Option A — use BioticExplorer (fastest)

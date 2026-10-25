@@ -25,10 +25,11 @@ stages count as "mature" for ling before fitting. Report `$params` (L50), not ju
 ```r
 library(tidyverse); library(DBI); library(duckdb); library(ggFishPlots)
 
-db_path <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-} else {
-  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+config_path <- path.expand("~/.bait/config.json")
+config <- if (file.exists(config_path)) jsonlite::fromJSON(config_path) else list()
+db_path <- config$bes_db_path
+if (is.null(db_path) || !nzchar(db_path)) {
+  stop("Use biotic-connect to configure the local database before running this recipe.")
 }
 
 con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
@@ -56,7 +57,9 @@ d <- indall |>
 d |> count(maturationstage)
 mature_codes <- NULL # Fill from a verified species-specific source.
 immature_codes <- NULL # Fill from the same source.
-stopifnot(length(mature_codes) > 0, length(immature_codes) > 0)
+stopifnot(length(mature_codes) > 0, length(immature_codes) > 0,
+          !anyNA(c(mature_codes, immature_codes)),
+          length(intersect(mature_codes, immature_codes)) == 0)
 d_l50 <- d |>
   mutate(mature = case_when(
     maturationstage %in% mature_codes ~ 1L,
@@ -70,6 +73,8 @@ fit <- plot_maturity(
   length = "length_cm",
   maturity = "mature",
   sex = "sex",
+  female.sex = "1", male.sex = "2", # NMD codes; verify codeindex for your source
+  length.unit = "cm",
   split.by.sex = TRUE
 )
 fit$plot      # the ogive

@@ -3,6 +3,18 @@ name: biotic-server-setup
 description: Download, install, update, or maintain the IMR Biotic DuckDB database with BioticExplorerServer. Use compileDatabase() for first-time setup and updateDatabase() for routine refreshes. Use when the user wants to set up the database, update it to newer data, fix a missing or outdated database, or check its location. Handles intranet checks, monitored background jobs, incremental changed-year updates, and safe full rebuilds when schemas change.
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Set up & maintain the Biotic database
 
 The database is a **DuckDB** file built by

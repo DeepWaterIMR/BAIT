@@ -3,6 +3,18 @@ name: biotic-lifehistory
 description: Produce fish life-history figures and parameters from Biotic individual data using ggFishPlots — maturity ogives (L50), growth curves (von Bertalanffy/Gompertz/logistic), length-weight relationships, catch curves. Use for "maturity ogive", "L50", "growth curve", "Linf/K", "length-weight".
 ---
 
+<!-- pack-resources:start -->
+**Pack resources:** resolve `BAIT` from `~/.bait/config.json` → `bait_path` (or
+`~/.fiskwise/config.json` → `components.BAIT.path`). If neither exists, use the
+checkout containing this skill, or locate/obtain the pack through its install instructions.
+Paths such as `knowledge/`, `cookbook/`, `config/` and `project-template/` belong to that
+repository, not the current research directory. For a copied skill, resolve a link that
+leaves this skill's directory against the corresponding source skill under that root;
+keep bundled `references/` links relative to the skill. Never assume `../../` from an
+agent's global skills folder reaches the repository. Use absolute resolved script paths.
+<!-- pack-resources:end -->
+
+
 # Life-history figures & parameters (ggFishPlots)
 
 [ggFishPlots](https://deepwaterimr.github.io/ggFishPlots/) takes **`indall`-shaped** data
@@ -32,7 +44,9 @@ library(ggFishPlots)
 # Set these only after checking an authoritative species-specific source.
 mature_codes <- NULL
 immature_codes <- NULL
-stopifnot(length(mature_codes) > 0, length(immature_codes) > 0)
+stopifnot(length(mature_codes) > 0, length(immature_codes) > 0,
+          !anyNA(c(mature_codes, immature_codes)),
+          length(intersect(mature_codes, immature_codes)) == 0)
 
 d_l50 <- d |>
   mutate(
@@ -49,23 +63,26 @@ fit <- plot_maturity(
   length = "length_cm",
   maturity = "mature",
   sex = "sex",
+  female.sex = "1", male.sex = "2", # NMD codes; verify codeindex for your source
+  length.unit = "cm",
   split.by.sex = TRUE
 )
 fit$plot
 fit$params
 
 # Growth model: von Bertalanffy (default), Gompertz, or logistic -> Linf, K, t0
-plot_growth(d, length = "length", age = "age")
+plot_growth(d, length = "length", age = "age", length.unit = "m")$plot
 
 # Length-weight relationship -> a, b
-plot_lw(d, length = "length", weight = "individualweight")
+plot_lw(d, length = "length", weight = "individualweight",
+        length.unit = "m", weight.unit = "kg")$plot
 
 # Catch curve -> total mortality Z
-plot_catchcurve(d, age = "age")
+plot_catchcurve(d, age = "age")$plot
 ```
 
 - Each function returns a list; grab `$params` (e.g. L50, L∞, K, a, b, Z) and report them.
-- Use a consistent look with `+ ggFishPlots::theme_fishplots()`.
+- Use a consistent look with `fit$plot + ggFishPlots::theme_fishplots()`.
 - Maturity coding: `maturationstage` is an NMDreference **code** — confirm a species-specific binary mature/immature
   mapping from an authoritative source before fitting; do not guess a general threshold (see [`../../knowledge/field-glossary.md`](../../knowledge/field-glossary.md)).
 - Check the function signatures (`?ggFishPlots::plot_maturity`) — argument names can evolve. Current API uses `split.by.sex` (not `split.by`) and returns `$plot` and `$params`.
