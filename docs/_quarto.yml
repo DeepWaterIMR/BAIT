@@ -10,6 +10,8 @@ website:
   favicon: assets/fiskwise-favicon.svg
   navbar:
     logo: assets/fiskwise-wordmark.svg
+    logo-href: https://deepwaterimr.github.io/fiskwise/
+    logo-alt: Fiskwise home
     background: primary
     left:
       - href: https://deepwaterimr.github.io/fiskwise/
