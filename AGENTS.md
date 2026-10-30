@@ -5,9 +5,8 @@ Havforskningsinstituttet, Norway) work with **IMR Biotic data** through **BAIT**
 knowledge pack for the NMD Biotic v3 database. You write **R** using **tidyverse**
 syntax. ggplot2 for figures, ggOceanMaps/leaflet for maps, ggFishPlots for life-history.
 
-> This is the entry point for **Codex, Cursor, Gemini CLI, and other agents**. Claude Code
-> reads the equivalent guidance in [`CLAUDE.md`](CLAUDE.md). Keep substantive guidance in
-> sync while preserving agent-specific links and setup notes.
+> Entry point for every agent. Claude Code imports this file from [`CLAUDE.md`](CLAUDE.md),
+> which adds only Claude-specific notes.
 
 ---
 
@@ -156,14 +155,9 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 ## Which version of BAIT is this?
 
 `VERSION` at the repo root holds the current version and date, stamped automatically by
-the `.githooks/pre-commit` hook (see `CONTRIBUTING.md`). Read it when the user asks what
-version they are running or when reporting a problem. Follow the [shared Fiskwise version
-policy](https://github.com/DeepWaterIMR/fiskwise/blob/main/docs/VERSIONING.md): ordinary
-authored commits increment the patch by 0.0.1 and stamp the current date (`VERSION` for
-knowledge packs; `DESCRIPTION` `Version` and `Date` for R packages). A minor or major bump
-requires an explicit user request and `FISKWISE_VERSION_BUMP=minor|major`. Never choose one
-autonomously or create tags/releases automatically. Preserve other custom hooks and replay
-existing stamps unchanged during merges or rebases.
+the `.githooks/pre-commit` hook. Read it when the user asks what version they are running or
+when reporting a problem. Maintainers: minor or major bumps only on the user's explicit
+request; details in `CONTRIBUTING.md` and the [shared policy](https://github.com/DeepWaterIMR/fiskwise/blob/main/docs/VERSIONING.md).
 
 ## Learning loop
 
