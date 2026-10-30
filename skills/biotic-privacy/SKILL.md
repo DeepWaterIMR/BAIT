@@ -49,6 +49,12 @@ queries of open data for a repeated confirmation.
 - Deliberate colleague sharing should use approved IMR channels, not an agent or public
   internet service.
 
+## Commercial catch data
+
+Sales notes and ERS logbooks (`catch-data`) identify vessels, buyers and fishing positions, even
+where ERS is published as open data. Keep raw extracts local and out of repositories and prompts;
+share annual totals and aggregates by gear, area or nation.
+
 ## If restricted material may have been exposed
 
 Tell the user promptly, stop further sharing, and help follow applicable IMR incident

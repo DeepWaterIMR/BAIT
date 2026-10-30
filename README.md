@@ -20,7 +20,10 @@ BAIT is a knowledge pack that turns a general coding agent (Claude Code, Codex, 
    [leaflet](https://rstudio.github.io/leaflet/),
    [ggFishPlots](https://deepwaterimr.github.io/ggFishPlots/), and
    [BioticExplorer](https://github.com/DeepWaterIMR/BioticExplorer)/Shiny.
-5. **Build reproducible Quarto analyses and reports** in HTML, Word, and PDF, using an
+5. **Extract Norwegian catch data** — sales notes (landings) and ERS logbooks with
+   [RstoxUtils](https://deepwaterimr.github.io/RstoxUtils/), shaped for spict-wise and
+   gadget-wise.
+6. **Build reproducible Quarto analyses and reports** in HTML, Word, and PDF, using an
    organisation's Word template when supplied, the bundled IMR web-report template when
    explicitly requested, or a generic Manuscript design otherwise.
 
@@ -93,7 +96,7 @@ BAIT is the data layer. The packs that build on it:
 
 - [**wise-writing**](https://github.com/DeepWaterIMR/wise-writing) — scientific writing style, document conventions, and the project skeleton the other packs scaffold from.
 - [**index-wise**](https://github.com/DeepWaterIMR/index-wise) — sdmTMB spatiotemporal survey indices, built from Biotic data through BAIT.
-- [**spict-wise**](https://github.com/DeepWaterIMR/spict-wise) — SPiCT biomass-dynamic stock assessments, driven by an index from index-wise and a catch series.
+- [**spict-wise**](https://github.com/DeepWaterIMR/spict-wise) — SPiCT biomass-dynamic stock assessments, driven by an index from index-wise and a catch series from `catch-data`.
 - [**gadget-wise**](https://github.com/DeepWaterIMR/gadget-wise) — gadget3 length- and age-structured models; BAIT is its default data-loop for Biotic length, age and maturity data.
 - [**wise-presentations**](https://github.com/DeepWaterIMR/wise-presentations) — Quarto RevealJS slides.
 

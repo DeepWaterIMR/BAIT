@@ -55,13 +55,15 @@ runtime; the repo is the pack's memory and grows through reviewed contributions 
 
 BAIT is part of the [Fiskwise ecosystem](https://deepwaterimr.github.io/fiskwise/), alongside
 [index-wise](https://github.com/DeepWaterIMR/index-wise), [wise-writing](https://github.com/DeepWaterIMR/wise-writing),
-[spict-wise](https://github.com/DeepWaterIMR/spict-wise), and
+[spict-wise](https://github.com/DeepWaterIMR/spict-wise),
+[gadget-wise](https://github.com/DeepWaterIMR/gadget-wise), and
 [wise-presentations](https://github.com/DeepWaterIMR/wise-presentations). Use each project's
 own skills and routing guidance for its workflow.
 
 ### Pack boundaries and shared skills
 
-BAIT owns Biotic data access, privacy, database maintenance, and Biotic-specific analysis. It
+BAIT owns Biotic data access, privacy, database maintenance, and Biotic-specific analysis, plus
+Norwegian commercial catch data (sales notes, ERS) through RstoxUtils (`catch-data`). It
 remains installable on its own; do not require Fiskwise or unrelated packs for Biotic work.
 When the user chooses Fiskwise-managed lifecycle, follow `fiskwise-install`,
 `fiskwise-update`, or `fiskwise-uninstall` without repeating clone, registry, skill-registration,
@@ -124,6 +126,7 @@ Pick the matching skill and read its `SKILL.md` before acting. Skills link into
 | Make a map (static or interactive) | `skills/biotic-maps/SKILL.md` |
 | Make a maturity ogive / growth curve / L–W plot | `skills/biotic-lifehistory/SKILL.md` |
 | Build an interactive dashboard | `skills/biotic-dashboards/SKILL.md` |
+| Norwegian landings (sales notes) or ERS logbook catches | `skills/catch-data/SKILL.md` |
 | Handle data safely / opt out of training | `skills/biotic-privacy/SKILL.md` |
 | Write or revise R code in managed work | `r-code-style` |
 | Write scientific documents or use shared package-loading/reporting conventions | wise-writing `academic-*`, `r-package-setup`, and `quarto-reporting` skills (install on demand) |
