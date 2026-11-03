@@ -127,6 +127,13 @@ after  <- stnall |> filter(is.na(stationtype) | !stationtype %in% c("2", "A", "C
   count() |> collect()
 ```
 
+Two more lazy-query habits:
+
+- **Compute dates and other literals in R before the query.** A date-extraction call inside `filter()` (for example `format(Sys.Date(), "%Y")`) can translate to SQL DuckDB rejects. Write `last_year <- as.integer(format(Sys.Date(), "%Y"))` first and filter on `startyear <= last_year`.
+- **Bound every `collect()`.** Count the lazy result first and stop if it exceeds a configured limit; a dropped condition then fails fast instead of pulling millions of rows into memory.
+
+**Check that the database is current before an analysis that spans to recent years.** Query `stnall |> summarise(max(startyear))` and compare with the year you expect; an outdated local database truncates a time series without any error (one survey-index project compiled 1981–2020 instead of 1981–2025 and ran a full model-selection round before noticing). Refresh with `biotic-server-setup`.
+
 ## Two ways to get data, same shape
 
 - **Database mode** (this file): query the compiled DuckDB. Best for cross-cruise questions.
