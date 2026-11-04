@@ -76,6 +76,12 @@ Codes **2, C, A and E** are the ones most often excluded from quantitative surve
 
 Consider **D** (commercial industrial-trawler catch) on the same grounds, and treat **H** and **I** with care: a trip station aggregates a whole trip, so it is not a haul-level sampling unit and will double-count if pooled with the individual hauls it summarises. As with the other quality fields, the rule is survey-specific — inspect the codes actually present and document the choice.
 
+For **swept-area survey indices, a keep-list is safer than a drop-list**: keep missing (unflagged), **1**, **3**, **9** and **13**. A drop-list of 2, A, C and E lets the multi-codend codes **4–8** through, so one multi-bag haul enters as several hauls with partial catches (seen in a 1995 research cruise). The keep-list also needs the explicit `is.na()` term:
+
+```r
+stn |> dplyr::filter(is.na(stationtype) | stationtype %in% c("1", "3", "9", "13"))
+```
+
 ### `NULL` is the normal case — do not drop it
 
 Most stations carry no `stationtype` at all (about 72% of `stnall` rows): an ordinary station with no special flag, which must be **retained**. This creates a trap, because the filter runs in DuckDB, not in R. SQL `NOT IN` evaluates to `NULL` — not `TRUE` — when the column is `NULL`, so those rows are discarded silently:
