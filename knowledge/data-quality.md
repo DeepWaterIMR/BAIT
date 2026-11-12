@@ -30,7 +30,7 @@ candidates <- indall |>
          station, serialnumber, length, individualweight, age, sex) |>
   collect() |>
   mutate(
-    length_cm = length * 100,
+    length_cm = round(length * 100, 6),
     K = if_else(
       !is.na(length_cm) & length_cm > 0 & !is.na(individualweight),
       100 * individualweight * 1000 / length_cm^3,

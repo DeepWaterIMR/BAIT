@@ -51,7 +51,7 @@ candidate_query <- function(measure) {
     slice_max(.data[[measure]], n = 10, with_ties = TRUE) |>
     select(missionid, missiontype, startyear, platform, missionnumber, station, serialnumber, length, individualweight, age, sex) |>
     collect() |>
-    mutate(length_cm = length * 100)
+    mutate(length_cm = round(length * 100, 6))
 }
 
 longest_candidates <- candidate_query("length")

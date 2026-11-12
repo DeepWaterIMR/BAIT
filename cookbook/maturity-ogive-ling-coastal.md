@@ -50,7 +50,7 @@ d <- indall |>
   filter(!!!rlang::parse_exprs(filtExp)) |>
   filter(commonname == "lange", !is.na(length), !is.na(maturationstage)) |>
   collect() |>
-  mutate(length_cm = length * 100)
+  mutate(length_cm = round(length * 100, 6))
 
 # Inspect stages, then fill these sets only after confirming a species-specific,
 # authoritative definition. These placeholders intentionally do not guess a mapping.

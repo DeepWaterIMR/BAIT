@@ -53,7 +53,11 @@ geographic lookups such as `icesarea` — confirm with `colnames(stnall)`.
 ## ⚠️ Units & gotchas (get these right)
 
 - **`length` is in METRES** (per the XSD). A 92 cm cod has `length = 0.92`. Present in cm
-  with `length * 100`. Sort "largest" by `length`.
+  with `round(length * 100, 6)`, never bare `length * 100`: the metre values are not exact in
+  binary, so `0.58 * 100` is `57.99999999999999` and `floor()`, `cut()`, `hist()` or `>=` put the
+  fish in the bin below. This hits 29, 57, 58, 113–116 cm and more (about 5 % of ling and tusk
+  lengths) and leaves a spike next to an empty bin in length distributions. Rounding to 6
+  decimals removes the error without changing any real length. Sort "largest" by `length`.
 - **`individualweight` is in KILOGRAMS**; `catchweight` is in kg.
 - **`commonname` is in Norwegian** (`"torsk"`, `"brosme"`, `"lange"`, …). See
   [`species-and-surveys.md`](species-and-surveys.md) and [`field-glossary.md`](field-glossary.md).

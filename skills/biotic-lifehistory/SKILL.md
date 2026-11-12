@@ -27,7 +27,7 @@ d <- indall |>
 ```
 
 `ggFishPlots` expects columns like `length`, `individualweight`, `age`, `sex`,
-`maturationstage`. Biotic `length` is in **metres**. Convert to cm before calling ggFishPlots, whose length scale and default label use cm (`length_cm = length * 100`).
+`maturationstage`. Biotic `length` is in **metres**. Convert to cm before calling ggFishPlots, whose length scale and default label use cm (`length_cm = round(length * 100, 6)`).
 
 ## Functions
 
@@ -46,7 +46,7 @@ stopifnot(length(mature_codes) > 0, length(immature_codes) > 0,
 
 d_l50 <- d |>
   mutate(
-    length_cm = length * 100,
+    length_cm = round(length * 100, 6),
     mature = case_when(
       maturationstage %in% mature_codes ~ 1L,
       maturationstage %in% immature_codes ~ 0L,

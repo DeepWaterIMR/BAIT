@@ -3,7 +3,7 @@ if (!requireNamespace("ggFishPlots", quietly = TRUE)) stop("ggFishPlots is requi
 set.seed(430)
 d <- data.frame(length = rep(seq(.15, .9, length.out = 120), 2),
                 sex = rep(c("1", "2"), each = 120))
-d$length_cm <- d$length * 100
+d$length_cm <- round(d$length * 100, 6)
 d$mature <- stats::rbinom(nrow(d), 1, stats::plogis((d$length_cm - 50) / 10))
 fit <- ggFishPlots::plot_maturity(d, length = "length_cm", maturity = "mature",
                                  sex = "sex", female.sex = "1", male.sex = "2",
