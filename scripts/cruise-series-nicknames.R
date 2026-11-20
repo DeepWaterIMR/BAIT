@@ -36,9 +36,10 @@ mdEscape <- function(x) gsub("|", "\\|", x, fixed = TRUE)
 utf8     <- function(x) { x <- as.character(x); Encoding(x) <- "UTF-8"; trimws(x) }
 
 dbPath <- function() {
-  if (.Platform$OS.type == "windows")
-    file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-  else path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+  home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+  path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+  if (file.exists(path)) return(path)
+  file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb") # legacy location
 }
 
 # ---- markdown blocks --------------------------------------------------------

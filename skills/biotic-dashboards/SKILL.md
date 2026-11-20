@@ -17,7 +17,7 @@ links that leave this skill's folder against the source skill there. Use absolut
 
 [BioticExplorer](https://github.com/DeepWaterIMR/BioticExplorer) is a finished Shiny app with
 file mode (XML) and database mode (auto-detects the DuckDB at
-`~/IMR_biotic_BES_database/`): catch maps, station overviews, species life-history plots,
+`~/Fiskwise_data/IMR_biotic_BES_database/`): catch maps, station overviews, species life-history plots,
 hierarchical tables, and exports.
 
 ```r
@@ -34,10 +34,10 @@ lazily. Skeleton:
 ```r
 library(shiny); library(tidyverse); library(DBI); library(duckdb); library(leaflet)
 
-db_path <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-} else {
-  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+db_path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+if (!file.exists(db_path)) { # legacy location, before Fiskwise_data
+  db_path <- file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb")
 }
 
 con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)

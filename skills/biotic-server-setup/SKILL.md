@@ -15,11 +15,14 @@ links that leave this skill's folder against the source skill there. Use absolut
 
 The database is a **DuckDB** file built by
 [BioticExplorerServer](https://github.com/DeepWaterIMR/BioticExplorerServer). Default
-location: `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB). On Windows the default
-is `%USERPROFILE%\IMR_biotic_BES_database\bioticexplorer.duckdb`, because R may expand `~` to
-the user's Documents folder, which OneDrive often redirects. BioticExplorerServer >= 0.8.7
-resolves this itself (`defaultDbPath()`), but keep passing an explicit path so setup behaves
-the same on older versions. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
+location: `~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB), inside the
+shared `~/Fiskwise_data/` folder that holds all Fiskwise databases. On Windows the default
+is `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\bioticexplorer.duckdb`, because R may
+expand `~` to the user's Documents folder, which OneDrive often redirects.
+BioticExplorerServer >= 0.8.10 resolves this itself (`defaultDbPath()`), but keep passing an
+explicit path so setup behaves the same on older versions. Databases installed before
+`Fiskwise_data` sit directly in the home folder (`~/IMR_biotic_BES_database/`); update them
+where they are, and offer the migration in Section 4. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
 was installed with `bait-install`.
 
 ## 0. Pre-flight (do this before downloading)
@@ -27,8 +30,8 @@ was installed with `bait-install`.
 1. **🔒 Location check (download = first-time or update).** The database must **not** live at a
    filesystem root or system dir (`/`, `C:\`, `C:\Program Files`, …). If asked to put it
    there, **refuse and suggest a user-space location**. Prefer the default
-   `~/IMR_biotic_BES_database/` on macOS/Linux, or
-   `%USERPROFILE%\IMR_biotic_BES_database\` on Windows; avoid cloud-synced/backup folders
+   `~/Fiskwise_data/IMR_biotic_BES_database/` on macOS/Linux, or
+   `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\` on Windows; avoid cloud-synced/backup folders
    such as OneDrive Documents (large + sensitive).
 2. **🌐 Intranet required (download only).** Building/updating downloads from the **IMR
    intranet** — the user must be on **VPN or HI-Adm Wi-Fi**.
@@ -93,7 +96,7 @@ to the database as `bes_download_log.log`.
 
 **macOS / Linux (screen; or tmux/nohup if screen is absent):**
 ```bash
-DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
+DB="$HOME/Fiskwise_data/IMR_biotic_BES_database"; mkdir -p "$DB"
 LOG="$DB/bes_download_log.log"
 screen -dmS bes_download bash -lc \
   "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 Rscript -e 'library(BioticExplorerServer); compileDatabase(dbPath=\"$DB\")' > \"$LOG\" 2>&1"
@@ -101,7 +104,7 @@ screen -dmS bes_download bash -lc \
 
 **Windows (PowerShell, background process):**
 ```powershell
-$DB = Join-Path $env:USERPROFILE "IMR_biotic_BES_database"
+$DB = Join-Path $env:USERPROFILE "Fiskwise_data\IMR_biotic_BES_database"
 New-Item -ItemType Directory -Force $DB | Out-Null
 $LOG = Join-Path $DB "bes_download_log.log"
 $ERR = Join-Path $DB "bes_download_err.log"
@@ -137,11 +140,8 @@ tail -n 30 "$LOG"     # progress; screen -ls shows the session; reattach with: s
 Tell the user it's running, roughly how long, and that they can keep working / close the
 terminal. Check the log periodically and report progress or errors. Verify on completion:
 ```r
-default_db_dir <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database")
-} else {
-  path.expand("~/IMR_biotic_BES_database")
-}
+home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+default_db_dir <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database")
 file.exists(file.path(default_db_dir, "bioticexplorer.duckdb"))
 ```
 
@@ -164,7 +164,10 @@ the new data (see "After the update" below). `BAIT` is `bait_path` from `~/.bait
 **macOS/Linux:**
 
 ```bash
-DB="$HOME/IMR_biotic_BES_database"; mkdir -p "$DB"
+DB="$HOME/Fiskwise_data/IMR_biotic_BES_database"
+LEGACY="$HOME/IMR_biotic_BES_database"   # before Fiskwise_data; update it in place
+[ ! -f "$DB/bioticexplorer.duckdb" ] && [ -f "$LEGACY/bioticexplorer.duckdb" ] && DB="$LEGACY"
+mkdir -p "$DB"
 BAIT="<bait_path>"
 LOG="$DB/bes_download_log.log"
 REPORT="$BAIT/scripts/db-update-report.R"
@@ -177,7 +180,10 @@ screen -dmS bes_update bash -lc \
 **Windows (PowerShell, after resolving `$Rscript` as in Step 2):**
 
 ```powershell
-$DB = Join-Path $env:USERPROFILE "IMR_biotic_BES_database"
+$DB = Join-Path $env:USERPROFILE "Fiskwise_data\IMR_biotic_BES_database"
+$LEGACY = Join-Path $env:USERPROFILE "IMR_biotic_BES_database"  # before Fiskwise_data
+if (-not (Test-Path (Join-Path $DB "bioticexplorer.duckdb")) -and
+    (Test-Path (Join-Path $LEGACY "bioticexplorer.duckdb"))) { $DB = $LEGACY }
 New-Item -ItemType Directory -Force $DB | Out-Null
 $DB_R = $DB -replace "\\", "/"
 $LOG = Join-Path $DB "bes_download_log.log"
@@ -251,16 +257,25 @@ Direct foreground use is simply:
 
 ```r
 library(BioticExplorerServer)
-default_db_dir <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database")
-} else {
-  path.expand("~/IMR_biotic_BES_database")
-}
+db_dir <- dirname(findDatabase()) # current or legacy location (>= 0.8.10)
 
-updateDatabase(dbPath = default_db_dir)
+updateDatabase(dbPath = db_dir)
 ```
 
 ## 4. Maintenance & troubleshooting
+
+- **Database in the legacy location?** If it sits directly in the home folder
+  (`~/IMR_biotic_BES_database/`), offer to move it into the shared Fiskwise data folder. Ask
+  first, make sure no connection or update is running, then move the whole folder (same
+  disk, so instant) and update `bes_db_path` in `~/.bait/config.json` (and the matching
+  entry in `~/.fiskwise/config.json` `databases`, if present):
+  ```bash
+  mkdir -p ~/Fiskwise_data && mv ~/IMR_biotic_BES_database ~/Fiskwise_data/
+  ```
+  ```powershell
+  New-Item -ItemType Directory -Force "$env:USERPROFILE\Fiskwise_data" | Out-Null
+  Move-Item "$env:USERPROFILE\IMR_biotic_BES_database" "$env:USERPROFILE\Fiskwise_data\"
+  ```
 
 - **Close other connections first.** R sessions / BioticExplorer holding the file block an
   update. `DBI::dbDisconnect(con, shutdown = TRUE)`.
@@ -273,7 +288,7 @@ updateDatabase(dbPath = default_db_dir)
 - **`utils::menu()` failed in background Rscript?** Fixed in BioticExplorerServer >= 0.8.7,
   which creates a missing database folder without prompting in non-interactive sessions. On
   older versions the target directory was probably not created at the same path that
-  `compileDatabase()` received: pre-create `%USERPROFILE%\IMR_biotic_BES_database\` and pass
+  `compileDatabase()` received: pre-create `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\` and pass
   that exact absolute path.
 - **Text shows `<c3><a5>` instead of `å`?** (e.g. `bl<c3><a5>kveite`.) Years written by
   BioticExplorerServer <= 0.8.8 under a non-UTF-8 locale. Fixed in >= 0.8.9, which also forces a

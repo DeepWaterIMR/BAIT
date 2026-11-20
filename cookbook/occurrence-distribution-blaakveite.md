@@ -41,10 +41,10 @@ additive (see [`../knowledge/sampling-units.md`](../knowledge/sampling-units.md)
 library(tidyverse); library(DBI); library(duckdb)
 library(mgcv); library(sf); library(ggOceanMaps)
 
-db_path <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-} else {
-  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+db_path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+if (!file.exists(db_path)) { # legacy location, before Fiskwise_data
+  db_path <- file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb")
 }
 
 con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)

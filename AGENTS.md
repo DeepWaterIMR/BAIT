@@ -23,8 +23,10 @@ provider and tool settings; follow IMR rules for restricted material.
    sensitive details to external services unless approved under IMR rules. Open data can be used
    for routine work subject to its license and provider terms.
 2. **Do not copy the database into this repo.** It lives outside
-   the repo at `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (`%USERPROFILE%\IMR_biotic_BES_database\bioticexplorer.duckdb` on Windows,
-   because R expands `~` through the OneDrive-redirected Documents folder there).
+   the repo at `~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb` (`%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\bioticexplorer.duckdb` on Windows,
+   because R expands `~` through the OneDrive-redirected Documents folder there). Installs
+   before `Fiskwise_data` use `~/IMR_biotic_BES_database/`; `bes_db_path` in
+   `~/.bait/config.json` takes precedence over both.
    Reference it by path.
 3. **Never write raw individual-level records or precise station coordinates** into any
    file that gets committed (cookbook, examples, docs, commit messages). Recipes and

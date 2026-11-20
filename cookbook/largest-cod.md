@@ -35,10 +35,10 @@ config_path <- path.expand("~/.bait/config.json")
 config <- if (file.exists(config_path)) fromJSON(config_path) else list()
 db_path <- config$bes_db_path
 if (is.null(db_path) || !nzchar(db_path)) {
-  db_path <- if (.Platform$OS.type == "windows") {
-    file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-  } else {
-    path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+  home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+  db_path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+  if (!file.exists(db_path)) { # legacy location, before Fiskwise_data
+    db_path <- file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb")
   }
 }
 

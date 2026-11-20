@@ -83,7 +83,7 @@ If useful, record the review date and provider/account in `~/.bait/config.json`.
      Documents. Example macOS/Linux config:
      ```json
      { "bait_path": "<chosen-path>",
-       "bes_db_path": "~/IMR_biotic_BES_database/bioticexplorer.duckdb",
+       "bes_db_path": "~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb",
        "privacy_onboarded_at": "<YYYY-MM-DD>",
        "privacy_onboarded_for": "<agent-or-tier>",
        "skills_synced_to": ["~/.claude/skills", "~/.agents/skills"],
@@ -217,12 +217,16 @@ should make you reach for the `biotic-*` skills automatically, in any project.
 ## Step 3 — Locate or install the Biotic database (BES DuckDB)
 
 1. **Look for it:** check `bes_db_path` from `~/.bait/config.json`, then the default
-   `~/IMR_biotic_BES_database/bioticexplorer.duckdb`. If present, adopt it and skip to Step 4;
+   `~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb`, then the legacy
+   `~/IMR_biotic_BES_database/bioticexplorer.duckdb` (installs before `Fiskwise_data`; on
+   Windows both under `%USERPROFILE%`). If present, adopt it and skip to Step 4; for a legacy
+   install, offer the migration in `biotic-server-setup` Section 4 but do not require it;
    never claim an existing database as BAIT-created.
 2. **If missing, ask whether to install it.** It's a large download (>2 GB, can take hours).
 3. **If yes, ask for the location** using the **same rules as Step 2** (no root/system dirs;
-   suggest a default). **Strongly recommend the default `~/IMR_biotic_BES_database/` on
-   macOS/Linux, or `%USERPROFILE%\IMR_biotic_BES_database\` on Windows** so the
+   suggest a default). **Strongly recommend the default `~/Fiskwise_data/IMR_biotic_BES_database/`
+   on macOS/Linux, or `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\` on Windows** (the
+   shared folder for all Fiskwise databases) so the
    BioticExplorer Shiny app can auto-detect it. Also recommend **not** placing the database in
    a cloud-synced/backup folder (Dropbox, OneDrive, ownCloud, OneDrive Documents) — it's
    large and sensitive. In managed mode, pass the selected path to the parent lifecycle so it

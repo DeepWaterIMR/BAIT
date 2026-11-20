@@ -5,8 +5,12 @@ The IMR Biotic database is a **DuckDB** file built by
 location:
 
 ```
-~/IMR_biotic_BES_database/bioticexplorer.duckdb
+~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb
 ```
+
+`~/Fiskwise_data/` is the shared folder for all Fiskwise databases. Databases installed
+before it existed sit at `~/IMR_biotic_BES_database/`; the snippet below falls back to that.
+If `bes_db_path` is set in `~/.bait/config.json`, it takes precedence.
 
 On Windows, use an explicit path under `Sys.getenv("USERPROFILE")` rather than `~`, because
 R can expand `~` to the Documents folder.
@@ -21,10 +25,10 @@ library(tidyverse)
 library(DBI)
 library(duckdb)
 
-db_path <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-} else {
-  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+db_path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+if (!file.exists(db_path)) { # legacy location, before Fiskwise_data
+  db_path <- file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb")
 }
 
 # Read-only: we never modify the database from BAIT.

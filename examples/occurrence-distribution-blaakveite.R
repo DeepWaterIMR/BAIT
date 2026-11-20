@@ -6,7 +6,7 @@
 ## Estimator : binomial GAM — spatial smooth for the map, depth/latitude model for the
 ##             habitat response curves
 ##
-## Requires a local DuckDB at ~/IMR_biotic_BES_database/bioticexplorer.duckdb, and a UTF-8
+## Requires a local DuckDB at ~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb, and a UTF-8
 ## locale (under LC_CTYPE=C the Norwegian commonname silently matches nothing).
 ## Data stay local: only aggregated grids, fitted surfaces and figures leave this script.
 
@@ -18,10 +18,10 @@ library(sf)
 library(ggOceanMaps)
 library(patchwork)
 
-db_path <- if (.Platform$OS.type == "windows") {
-  file.path(Sys.getenv("USERPROFILE"), "IMR_biotic_BES_database", "bioticexplorer.duckdb")
-} else {
-  path.expand("~/IMR_biotic_BES_database/bioticexplorer.duckdb")
+home <- if (.Platform$OS.type == "windows") Sys.getenv("USERPROFILE") else path.expand("~")
+db_path <- file.path(home, "Fiskwise_data", "IMR_biotic_BES_database", "bioticexplorer.duckdb")
+if (!file.exists(db_path)) { # legacy location, before Fiskwise_data
+  db_path <- file.path(home, "IMR_biotic_BES_database", "bioticexplorer.duckdb")
 }
 con <- dbConnect(duckdb::duckdb(), dbdir = db_path, read_only = TRUE)
 stnall <- tbl(con, "stnall")

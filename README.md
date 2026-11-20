@@ -3,7 +3,7 @@
 # 🎣 BAIT — Biotic AI Toolkit
 
 <!-- version -->
-**Version 0.2.30** (2026-11-19)
+**Version 0.2.31** (2026-11-20)
 
 **Teach your AI coding agent to work with IMR Biotic data — safely, on your own machine.**
 
@@ -40,8 +40,9 @@ Most Biotic data are open; some subsets are restricted or sensitive. Classify da
 - BAIT contains **instructions only — never database records**. Examples and cookbook recipes
   use code and synthetic values, not real records. Ignore files block common data extensions
   as a safety net.
-- The database lives **outside** this repo (`~/IMR_biotic_BES_database/` by default on
-  macOS/Linux; `%USERPROFILE%\IMR_biotic_BES_database\` on Windows). These are defaults; the
+- The database lives **outside** this repo (`~/Fiskwise_data/IMR_biotic_BES_database/` by
+  default on macOS/Linux; `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\` on Windows;
+  older installs directly in the home folder are still found). These are defaults; the
   configured `bes_db_path` takes precedence.
 - During setup, review provider training, retention, and tool-transmission controls. An
   onboarding record reflects a past review; settings may change, and a training opt-out does
