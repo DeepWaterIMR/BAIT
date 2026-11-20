@@ -19,7 +19,7 @@ location: `~/Fiskwise_data/IMR_biotic_BES_database/bioticexplorer.duckdb` (>2 GB
 shared `~/Fiskwise_data/` folder that holds all Fiskwise databases. On Windows the default
 is `%USERPROFILE%\Fiskwise_data\IMR_biotic_BES_database\bioticexplorer.duckdb`, because R may
 expand `~` to the user's Documents folder, which OneDrive often redirects.
-BioticExplorerServer >= 0.8.10 resolves this itself (`defaultDbPath()`), but keep passing an
+BioticExplorerServer >= 0.8.14 resolves this itself (`defaultDbPath()`), but keep passing an
 explicit path so setup behaves the same on older versions. Databases installed before
 `Fiskwise_data` sit directly in the home folder (`~/IMR_biotic_BES_database/`); update them
 where they are, and offer the migration in Section 4. Use the chosen `bes_db_path` from `~/.bait/config.json` if BAIT
@@ -257,7 +257,7 @@ Direct foreground use is simply:
 
 ```r
 library(BioticExplorerServer)
-db_dir <- dirname(findDatabase()) # current or legacy location (>= 0.8.10)
+db_dir <- dirname(findDatabase()) # current or legacy location (>= 0.8.14)
 
 updateDatabase(dbPath = db_dir)
 ```
